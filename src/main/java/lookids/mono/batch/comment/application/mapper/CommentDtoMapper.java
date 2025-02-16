@@ -4,16 +4,16 @@ import org.springframework.stereotype.Component;
 
 import lookids.mono.batch.comment.adaptor.in.kafka.event.CommentEvent;
 import lookids.mono.batch.comment.adaptor.in.kafka.event.ReplyEvent;
-import lookids.mono.batch.comment.application.port.dto.CommentCreateEventDto;
+import lookids.mono.batch.comment.application.port.dto.CommentCreateBatchDto;
 import lookids.mono.batch.comment.application.port.dto.CommentLogSaveDto;
-import lookids.mono.batch.comment.application.port.dto.ReplyCreateEventDto;
+import lookids.mono.batch.comment.application.port.dto.ReplyCreateBatchDto;
 import lookids.mono.batch.comment.domain.model.CommentLog;
 
 @Component
 public class CommentDtoMapper {
 
-	public CommentCreateEventDto toCommentCreateEventDto(CommentEvent commentEvent) {
-		return CommentCreateEventDto.builder()
+	public CommentCreateBatchDto toCommentCreateEventDto(CommentEvent commentEvent) {
+		return CommentCreateBatchDto.builder()
 			.commentCode(commentEvent.getCommentCode())
 			.feedCode(commentEvent.getFeedCode())
 			.uuid(commentEvent.getUuid())
@@ -33,8 +33,8 @@ public class CommentDtoMapper {
 			.build();
 	}
 
-	public ReplyCreateEventDto toReplyCreateEventDto(ReplyEvent replyEvent) {
-		return ReplyCreateEventDto.builder()
+	public ReplyCreateBatchDto toReplyCreateEventDto(ReplyEvent replyEvent) {
+		return ReplyCreateBatchDto.builder()
 			.commentCode(replyEvent.getCommentCode())
 			.feedCode(replyEvent.getFeedCode())
 			.uuid(replyEvent.getUuid())

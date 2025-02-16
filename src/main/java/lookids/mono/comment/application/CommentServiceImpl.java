@@ -2,8 +2,6 @@ package lookids.mono.comment.application;
 
 import java.util.UUID;
 
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,10 +13,10 @@ import lookids.mono.comment.dto.in.CommentRequestDto;
 import lookids.mono.comment.dto.in.ReplyRequestDto;
 import lookids.mono.comment.dto.out.CommentResponseDto;
 import lookids.mono.comment.infrastructure.CommentRepository;
-import lookids.mono.comment.vo.out.CommentKafkaVo;
-import lookids.mono.comment.vo.out.ReplyKafkaVo;
 import lookids.mono.common.entity.BaseResponseStatus;
 import lookids.mono.common.exception.BaseException;
+import lookids.mono.sync.application.mapper.SyncDtoMapper;
+import lookids.mono.sync.application.port.in.SyncServicePort;
 
 @Slf4j
 @Transactional
@@ -27,28 +25,33 @@ import lookids.mono.common.exception.BaseException;
 public class CommentServiceImpl implements CommentService {
 
 	private final CommentRepository commentRepository;
-	private final KafkaTemplate<String, CommentKafkaVo> commentkafkaTemplate;
-	private final KafkaTemplate<String, ReplyKafkaVo> replykafkaTemplate;
+	//private final KafkaTemplate<String, CommentKafkaVo> commentkafkaTemplate;
+	//private final KafkaTemplate<String, ReplyKafkaVo> replykafkaTemplate;
 
-	@Value("${comment.create}")
-	private String commentCreateTopic;
+	private final SyncServicePort syncServicePort;
+	private final SyncDtoMapper syncDtoMapper;
 
-	@Value("${comment.delete}")
-	private String commentDeleteTopic;
-
-	@Value("${reply.create}")
-	private String replyCreateTopic;
-
-	@Value("${reply.delete}")
-	private String replyDeleteTopic;
+	//	@Value("${comment.create}")
+	//	private String commentCreateTopic;
+	//
+	//	@Value("${comment.delete}")
+	//	private String commentDeleteTopic;
+	//
+	//	@Value("${reply.create}")
+	//	private String replyCreateTopic;
+	//
+	//	@Value("${reply.delete}")
+	//	private String replyDeleteTopic;
 
 	@Override
 	public void createComment(CommentRequestDto commentRequestDto) {
 
 		Comment comment = commentRepository.save(commentRequestDto.toEntity(generateUniqueCommentCode()));
 		//save() 메서드는 엔티티의 삽입(insert)과 수정(update)을 처리하는 중요한 메서드
-		commentkafkaTemplate.send(commentCreateTopic,
-			CommentResponseDto.toDto(comment).toCommentKafkaVo(commentRequestDto.getFeedUuid()));
+		//        commentkafkaTemplate.send(commentCreateTopic,
+		//                CommentResponseDto.toDto(comment).toCommentKafkaVo(commentRequestDto.getFeedUuid()));
+		syncServicePort.createComment(syncDtoMapper.toCommentDto(
+			CommentResponseDto.toDto(comment).toCommentKafkaVo(commentRequestDto.getFeedUuid())));
 	}
 
 	@Override
@@ -57,8 +60,10 @@ public class CommentServiceImpl implements CommentService {
 		Comment comment = commentRepository.save(replyRequestDto.toEntity(generateUniqueCommentCode()));
 		//save() 메서드는 엔티티의 삽입(insert)과 수정(update)을 처리하는 중요한 메서드
 		log.info("${reply.create}");
-		replykafkaTemplate.send(replyCreateTopic,
-			CommentResponseDto.toDto(comment).toReplyKafkaVo(replyRequestDto.getFeedUuid()));
+		// replykafkaTemplate.send(replyCreateTopic,
+		// 	CommentResponseDto.toDto(comment).toReplyKafkaVo(replyRequestDto.getFeedUuid()));
+		syncServicePort.createReply(syncDtoMapper.toReplyDto(
+			CommentResponseDto.toDto(comment).toReplyKafkaVo(replyRequestDto.getFeedUuid())));
 	}
 
 	@Override
@@ -66,7 +71,8 @@ public class CommentServiceImpl implements CommentService {
 		Comment comment = commentRepository.findByCommentCodeAndUserUuidAndCommentStatus(
 				commentDeleteDto.getCommentCode(), commentDeleteDto.getUserUuid(), true)
 			.orElseThrow(() -> new BaseException(BaseResponseStatus.NO_EXIST_DATA));
-		commentkafkaTemplate.send(commentDeleteTopic, CommentResponseDto.toDto(comment).toCommentDeleteKafkaVo());
+		syncServicePort.deleteComment(
+			syncDtoMapper.toCommentDto(CommentResponseDto.toDto(comment).toCommentDeleteKafkaVo()));
 		commentRepository.save(commentDeleteDto.toEntity(comment));
 	}
 
@@ -75,7 +81,8 @@ public class CommentServiceImpl implements CommentService {
 		Comment comment = commentRepository.findByCommentCodeAndUserUuidAndCommentStatus(
 				commentDeleteDto.getCommentCode(), commentDeleteDto.getUserUuid(), true)
 			.orElseThrow(() -> new BaseException(BaseResponseStatus.NO_EXIST_DATA));
-		replykafkaTemplate.send(replyDeleteTopic, CommentResponseDto.toDto(comment).toReplyDeleteKafkaVo());
+		syncServicePort.deleteReply(
+			syncDtoMapper.toReplyDto(CommentResponseDto.toDto(comment).toReplyDeleteKafkaVo()));
 		commentRepository.save(commentDeleteDto.toEntity(comment));
 	}
 

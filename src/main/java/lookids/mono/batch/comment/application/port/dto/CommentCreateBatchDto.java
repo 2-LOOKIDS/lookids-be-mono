@@ -8,14 +8,14 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
-public class CommentCreateEventDto {
+public class CommentCreateBatchDto {
 	private String commentCode;
 	private String feedCode;
 	private String uuid;
 	private LocalDateTime createdAt;
 
 	@Builder
-	public CommentCreateEventDto(String commentCode, String feedCode, String uuid, LocalDateTime createdAt) {
+	public CommentCreateBatchDto(String commentCode, String feedCode, String uuid, LocalDateTime createdAt) {
 		this.commentCode = commentCode;
 		this.feedCode = feedCode;
 		this.uuid = uuid;
