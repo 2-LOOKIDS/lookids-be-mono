@@ -1,18 +1,11 @@
 package lookids.mono.notification.service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-
 import org.springframework.stereotype.Service;
 
 import com.google.firebase.messaging.FirebaseMessaging;
-import com.google.firebase.messaging.FirebaseMessagingException;
-import com.google.firebase.messaging.Message;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import lookids.mono.notification.domain.FcmToken;
 import lookids.mono.notification.domain.Notification;
 import lookids.mono.notification.dto.in.FcmTokenRequestDto;
 import lookids.mono.notification.repository.FcmTokenRepository;
@@ -28,6 +21,8 @@ public class NotificationPushServiceImpl implements NotificationPushService {
 	@Override
 	public void sendPushNotification(String token, Notification notification) {
 		// com.google.firebase.messaging.Notification 은 Builder 클래스에 대한 public 접근을 허용하지 않지만, Notification.builder()라는 정적 메서드를 제공
+
+		/*
 		com.google.firebase.messaging.Notification fcmNotification = com.google.firebase.messaging.Notification.builder() // builder() 메서드 사용
 			.setTitle(notification.getTitle())  // 제목 설정
 			.setBody(notification.getContent()) // 내용 설정
@@ -41,10 +36,12 @@ public class NotificationPushServiceImpl implements NotificationPushService {
 		} catch (FirebaseMessagingException e) {
 			log.error("FCM Feed Notification Error: {}", e.getMessage());
 		}
+		*/
 	}
 
 	@Override
 	public void createFcmToken(FcmTokenRequestDto fcmTokenRequestDto) {
+		/*
 		// MongoDB에서 UUID로 기존 문서 조회
 		Optional<FcmToken> optionalFcmToken = fcmTokenRepository.findByUuid(fcmTokenRequestDto.getUuid());
 		FcmToken fcmToken;
@@ -66,10 +63,12 @@ public class NotificationPushServiceImpl implements NotificationPushService {
 
 		// 저장 (MongoDB가 ID 유무에 따라 새로 생성하거나 업데이트함)
 		fcmTokenRepository.save(fcmToken);
+		 */
 	}
 
 	@Override
 	public void deleteFcmToken(String uuid, String fcmToken) {
+		/*
 		// MongoDB에서 UUID로 기존 문서 조회
 		FcmToken fcmTokenDocument = fcmTokenRepository.findByUuid(uuid).get();
 
@@ -82,5 +81,6 @@ public class NotificationPushServiceImpl implements NotificationPushService {
 				fcmTokenRepository.save(fcmTokenDocument);
 			}
 		}
+		*/
 	}
 }
