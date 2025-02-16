@@ -3,7 +3,6 @@ package lookids.mono.user.userprofile.application;
 import java.util.Random;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
@@ -21,11 +20,9 @@ import lookids.mono.user.userprofile.dto.out.FollowKafkaDto;
 import lookids.mono.user.userprofile.dto.out.UserProfileKafkaDto;
 import lookids.mono.user.userprofile.dto.out.UserProfileResponseDto;
 import lookids.mono.user.userprofile.infrastructure.UserProfileRepository;
-import lookids.mono.user.userprofile.vo.in.CommentEventVo;
 import lookids.mono.user.userprofile.vo.in.FeedEventVo;
 import lookids.mono.user.userprofile.vo.in.FollowEventVo;
 import lookids.mono.user.userprofile.vo.in.ReplyEventVo;
-import lookids.mono.user.userprofile.vo.out.FollowKafkaVo;
 import lookids.mono.user.userprofile.vo.out.NicknameKafkaVo;
 import lookids.mono.user.userprofile.vo.out.ProfileImageKafkaVo;
 import lookids.mono.user.userprofile.vo.out.UserProfileKafkaVo;
@@ -157,53 +154,94 @@ public class UserProfileServiceImpl implements UserProfileService {
 
 	private final KafkaTemplate<String, UserProfileKafkaVo> userProfileKafkaTemplate;
 
-	@Value("${comment.join}")
-	private String commentJoinTopic;
+	// @Value("${comment.join}")
+	// private String commentJoinTopic;
 
-	@Value("${reply.join}")
-	private String replyJoinTopic;
+	// @Value("${reply.join}")
+	// private String replyJoinTopic;
 
-	@Value("${feed.join}")
-	private String feedJoinTopic;
+	// @Value("${feed.join}")
+	// private String feedJoinTopic;
 
-	@KafkaListener(topics = "${comment.create}", groupId = "${group-id.user}", containerFactory = "commentUserListenerContainerFactory")
-	public void consumeCommentEvent(CommentEventVo commentEventVo) {
+	// @KafkaListener(topics = "${comment.create}", groupId = "${group-id.user}", containerFactory = "commentUserListenerContainerFactory")
+	// public void consumeCommentEvent(CommentEventVo commentEventVo) {
+	//
+	// 	log.info("consumeCommentEvent: {}", commentEventVo);
+	//
+	// 	UserProfile userProfile = userProfileRepository.findByUserUuid(commentEventVo.getUuid())
+	// 		.orElseThrow(() -> new BaseException(BaseResponseStatus.NO_EXIST_DATA));
+	// 	sendMessage(commentJoinTopic, UserProfileKafkaDto.toDto(userProfile).toVo());
+	// }
+	@Override
+	public UserProfileKafkaDto consumeCommentEvent(String uuid) {
 
-		log.info("consumeCommentEvent: {}", commentEventVo);
+		log.info("consumeCommentEvent: {}", uuid);
 
-		UserProfile userProfile = userProfileRepository.findByUserUuid(commentEventVo.getUuid())
+		UserProfile userProfile = userProfileRepository.findByUserUuid(uuid)
 			.orElseThrow(() -> new BaseException(BaseResponseStatus.NO_EXIST_DATA));
-		sendMessage(commentJoinTopic, UserProfileKafkaDto.toDto(userProfile).toVo());
+		return UserProfileKafkaDto.toDto(userProfile);
 	}
 
-	@KafkaListener(topics = "${reply.create}", groupId = "${group-id.user}", containerFactory = "replyUserListenerContainerFactory")
-	public void consumeReplyEvent(ReplyEventVo replyEventVo) {
+	// @KafkaListener(topics = "${reply.create}", groupId = "${group-id.user}", containerFactory = "replyUserListenerContainerFactory")
+	// public void consumeReplyEvent(ReplyEventVo replyEventVo) {
+	//
+	// 	log.info("consumeReplyEvent: {}", replyEventVo);
+	//
+	// 	UserProfile userProfile = userProfileRepository.findByUserUuid(replyEventVo.getUuid())
+	// 		.orElseThrow(() -> new BaseException(BaseResponseStatus.NO_EXIST_DATA));
+	//
+	// 	sendMessage(replyJoinTopic, UserProfileKafkaDto.toDto(userProfile).toVo());
+	// }
+	@Override
+	public UserProfileKafkaDto consumeReplyEvent(ReplyEventVo replyEventVo) {
 
 		log.info("consumeReplyEvent: {}", replyEventVo);
 
 		UserProfile userProfile = userProfileRepository.findByUserUuid(replyEventVo.getUuid())
 			.orElseThrow(() -> new BaseException(BaseResponseStatus.NO_EXIST_DATA));
 
-		sendMessage(replyJoinTopic, UserProfileKafkaDto.toDto(userProfile).toVo());
+		return UserProfileKafkaDto.toDto(userProfile);
 	}
 
-	@KafkaListener(topics = "${feed.create}", groupId = "${group-id.user}", containerFactory = "feedUserListenerContainerFactory")
-	public void consumeFeedEvent(FeedEventVo feedEventVo) {
+	// @KafkaListener(topics = "${feed.create}", groupId = "${group-id.user}", containerFactory = "feedUserListenerContainerFactory")
+	// public void consumeFeedEvent(FeedEventVo feedEventVo) {
+	//
+	// 	log.info("consumeFeedEvent: {}", feedEventVo);
+	//
+	// 	UserProfile userProfile = userProfileRepository.findByUserUuid(feedEventVo.getUuid())
+	// 		.orElseThrow(() -> new BaseException(BaseResponseStatus.NO_EXIST_DATA));
+	//
+	// 	sendMessage(feedJoinTopic, UserProfileKafkaDto.toDto(userProfile).toVo());
+	// }
+	@Override
+	public UserProfileKafkaDto consumeFeedEvent(FeedEventVo feedEventVo) {
 
 		log.info("consumeFeedEvent: {}", feedEventVo);
 
 		UserProfile userProfile = userProfileRepository.findByUserUuid(feedEventVo.getUuid())
 			.orElseThrow(() -> new BaseException(BaseResponseStatus.NO_EXIST_DATA));
 
-		sendMessage(feedJoinTopic, UserProfileKafkaDto.toDto(userProfile).toVo());
+		return UserProfileKafkaDto.toDto(userProfile);
 	}
 
-	private final KafkaTemplate<String, FollowKafkaVo> followJoinKafkaTemplate;
-	@Value("${follow.join}")
-	private String followJoinTopic;
+	// private final KafkaTemplate<String, FollowKafkaVo> followJoinKafkaTemplate;
+	// @Value("${follow.join}")
+	// private String followJoinTopic;
 
-	@KafkaListener(topics = "${follow.create}", groupId = "${group-id.user}", containerFactory = "followUserListenerContainerFactory")
-	public void consumeFollowEvent(FollowEventVo feedEventVo) {
+	// @KafkaListener(topics = "${follow.create}", groupId = "${group-id.user}", containerFactory = "followUserListenerContainerFactory")
+	// public void consumeFollowEvent(FollowEventVo feedEventVo) {
+	//
+	// 	log.info("consumeFollowEvent: {}", feedEventVo);
+	//
+	// 	UserProfile senderProfile = userProfileRepository.findByUserUuid(feedEventVo.getSenderUuid())
+	// 		.orElseThrow(() -> new BaseException(BaseResponseStatus.NO_EXIST_DATA));
+	// 	UserProfile receiverProfile = userProfileRepository.findByUserUuid(feedEventVo.getReceiverUuid())
+	// 		.orElseThrow(() -> new BaseException(BaseResponseStatus.NO_EXIST_DATA));
+	//
+	// 	followJoinKafkaTemplate.send(followJoinTopic, FollowKafkaDto.toDto(senderProfile, receiverProfile).toVo());
+	// }
+	@Override
+	public FollowKafkaDto consumeFollowEvent(FollowEventVo feedEventVo) {
 
 		log.info("consumeFollowEvent: {}", feedEventVo);
 
@@ -212,10 +250,10 @@ public class UserProfileServiceImpl implements UserProfileService {
 		UserProfile receiverProfile = userProfileRepository.findByUserUuid(feedEventVo.getReceiverUuid())
 			.orElseThrow(() -> new BaseException(BaseResponseStatus.NO_EXIST_DATA));
 
-		followJoinKafkaTemplate.send(followJoinTopic, FollowKafkaDto.toDto(senderProfile, receiverProfile).toVo());
+		return FollowKafkaDto.toDto(senderProfile, receiverProfile);
 	}
 
-	public void sendMessage(String topic, UserProfileKafkaVo userProfileKafkaVo) {
-		userProfileKafkaTemplate.send(topic, userProfileKafkaVo);
-	}
+	// public void sendMessage(String topic, UserProfileKafkaVo userProfileKafkaVo) {
+	// 	userProfileKafkaTemplate.send(topic, userProfileKafkaVo);
+	// }
 }

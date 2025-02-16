@@ -42,10 +42,10 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-mongodb-reactive'
 
     // kafka
-    implementation 'org.springframework.kafka:spring-kafka'
+    //implementation 'org.springframework.kafka:spring-kafka'
 
     // Firebase Admin SDK
-    implementation 'com.google.firebase:firebase-admin:9.4.1'
+    //implementation 'com.google.firebase:firebase-admin:9.4.1'
 
     runtimeOnly 'com.mysql:mysql-connector-j'
     compileOnly 'org.projectlombok:lombok'
@@ -65,7 +65,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 
     // Spring Cloud OpenFeign 의존성
-    implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
+    //implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
 
     //Spirng security
     implementation 'org.springframework.boot:spring-boot-starter-security'
