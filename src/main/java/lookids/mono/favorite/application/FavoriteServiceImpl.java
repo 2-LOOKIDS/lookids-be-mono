@@ -5,41 +5,43 @@ import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lookids.mono.favorite.domain.Favorite;
 import lookids.mono.favorite.domain.FavoriteType;
-import lookids.mono.favorite.dto.FavoriteBatchDto;
-import lookids.mono.favorite.dto.FavoriteNotificationDto;
 import lookids.mono.favorite.dto.FavoriteRequestDto;
 import lookids.mono.favorite.dto.FavoriteResponseDto;
 import lookids.mono.favorite.infrastructure.FavoriteRepository;
+import lookids.mono.sync.application.mapper.SyncDtoMapper;
+import lookids.mono.sync.application.port.in.SyncServicePort;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class FavoriteServiceImpl implements FavoriteService {
 	private final FavoriteRepository favoriteRepository;
-	private final KafkaTemplate<String, FavoriteBatchDto> kafkaTemplateForBatch;
-	private final KafkaTemplate<String, FavoriteNotificationDto> kafkaTemplateForNotification;
+	// private final KafkaTemplate<String, FavoriteBatchDto> kafkaTemplateForBatch;
+	// private final KafkaTemplate<String, FavoriteNotificationDto> kafkaTemplateForNotification;
+
+	private final SyncServicePort syncServicePort;
+	private final SyncDtoMapper syncDtoMapper;
 
 	@Override
 	public void createFavorite(FavoriteRequestDto favoriteRequestDto) {
 		Favorite saveFavorite = favoriteRepository.save(favoriteRequestDto.toEntity());
 
-		kafkaTemplateForBatch.send("favorite-update", FavoriteBatchDto.toDto(saveFavorite)); //배치용
-
-		if (favoriteRequestDto.getFavoriteType() == FavoriteType.FEED) {
-			kafkaTemplateForNotification.send("feed-favorite-create",
-				FavoriteNotificationDto.toDto(favoriteRequestDto)); //알림용
-		} else {
-			kafkaTemplateForNotification.send("comment-favorite-create",
-				FavoriteNotificationDto.toDto(favoriteRequestDto)); //알림용
-		}
-
+		// kafkaTemplateForBatch.send("favorite-update", FavoriteBatchDto.toDto(saveFavorite)); //배치용
+		//
+		// if (favoriteRequestDto.getFavoriteType() == FavoriteType.FEED) {
+		// 	kafkaTemplateForNotification.send("feed-favorite-create",
+		// 		FavoriteNotificationDto.toDto(favoriteRequestDto)); //알림용
+		// } else {
+		// 	kafkaTemplateForNotification.send("comment-favorite-create",
+		// 		FavoriteNotificationDto.toDto(favoriteRequestDto)); //알림용
+		// }
+		syncServicePort.createFavorite(syncDtoMapper.toFavoriteDto(favoriteRequestDto));
 	}
 
 	@Override
@@ -51,7 +53,7 @@ public class FavoriteServiceImpl implements FavoriteService {
 			createFavorite(favoriteRequestDto);
 		} else {
 			Favorite saveFavorite = favoriteRepository.save(FavoriteRequestDto.toUpdateEntity(favorite));
-			kafkaTemplateForBatch.send("favorite-update", FavoriteBatchDto.toDto(saveFavorite));
+			syncServicePort.updateFavorite(syncDtoMapper.toFavoriteDto(favoriteRequestDto));
 		}
 
 	}

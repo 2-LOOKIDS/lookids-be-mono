@@ -8,7 +8,7 @@ import lombok.ToString;
 @Getter
 @ToString
 @NoArgsConstructor
-public class KafkaUserCreateRequestDto {
+public class KafkaUserCreateDto {
 
 	private String uuid;
 	private String nickname;
@@ -16,7 +16,7 @@ public class KafkaUserCreateRequestDto {
 	private String image;
 
 	@Builder
-	public KafkaUserCreateRequestDto(String uuid, String nickname, String tag, String image) {
+	public KafkaUserCreateDto(String uuid, String nickname, String tag, String image) {
 		this.uuid = uuid;
 		this.nickname = nickname;
 		this.tag = tag;

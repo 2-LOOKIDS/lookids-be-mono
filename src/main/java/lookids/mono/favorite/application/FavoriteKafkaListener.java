@@ -3,7 +3,6 @@ package lookids.mono.favorite.application;
 import java.util.List;
 
 import org.springframework.kafka.annotation.KafkaListener;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
@@ -15,10 +14,10 @@ import lookids.mono.favorite.dto.FeedKafkaRequestDto;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class favoriteKafkaListener {
+public class FavoriteKafkaListener {
 
 	private final FavoriteService favoriteService;
-	private final KafkaTemplate<String, FavoriteFeedDto> kafkaTemplate;
+	//private final KafkaTemplate<String, FavoriteFeedDto> kafkaTemplate;
 
 	@KafkaListener(topics = "favorite-request", groupId = "favorite-join-feed", containerFactory = "feedFavoriteEventListenerContainerFactory")
 	public void consumeFeed(FeedKafkaRequestDto requestDto) {

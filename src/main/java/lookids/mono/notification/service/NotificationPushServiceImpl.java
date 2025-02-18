@@ -2,8 +2,6 @@ package lookids.mono.notification.service;
 
 import org.springframework.stereotype.Service;
 
-import com.google.firebase.messaging.FirebaseMessaging;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lookids.mono.notification.domain.Notification;
@@ -16,7 +14,7 @@ import lookids.mono.notification.repository.FcmTokenRepository;
 public class NotificationPushServiceImpl implements NotificationPushService {
 
 	private final FcmTokenRepository fcmTokenRepository;
-	private final FirebaseMessaging firebaseMessaging;
+	//private final FirebaseMessaging firebaseMessaging;
 
 	@Override
 	public void sendPushNotification(String token, Notification notification) {

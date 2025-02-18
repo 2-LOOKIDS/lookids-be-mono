@@ -11,7 +11,6 @@ import org.springframework.data.mongodb.core.ChangeStreamOptions;
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.query.Criteria;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import com.mongodb.client.model.changestream.OperationType;
@@ -40,6 +39,8 @@ import lookids.mono.chatting.infrastructure.ChatRoomRepositoryCustom;
 import lookids.mono.common.entity.BaseResponseStatus;
 import lookids.mono.common.exception.BaseException;
 import lookids.mono.common.utils.CursorPage;
+import lookids.mono.sync.application.mapper.SyncDtoMapper;
+import lookids.mono.sync.application.port.in.SyncServicePort;
 import reactor.core.publisher.Flux;
 
 @Slf4j
@@ -51,7 +52,10 @@ public class ChattingServiceImpl implements ChattingService {
 	private final ChatRoomRepositoryCustom chatRoomRepositoryCustom;
 	private final ChatMessageRepository chatMessageRepository;
 	private final ReactiveMongoTemplate reactiveMongoTemplate;
-	private final KafkaTemplate<String, NotificationKafkaRequestDto> chattingKafkaTemplate;
+	//private final KafkaTemplate<String, NotificationKafkaRequestDto> chattingKafkaTemplate;
+
+	private final SyncServicePort syncServicePort;
+	private final SyncDtoMapper syncDtoMapper;
 
 	@Override
 	public RoomIdResponseDto createChatRoom(ChatRoomRequestDto chatRoomRequestDto) { // 채팅방 생성
@@ -88,8 +92,8 @@ public class ChattingServiceImpl implements ChattingService {
 
 			// Kafka 알림: 오프라인 사용자에게만 전송
 			if (!offlineReceiverUuids.isEmpty()) {
-				chattingKafkaTemplate.send("chatting-create",
-					NotificationKafkaRequestDto.toDto(savedChatMessage, offlineReceiverUuids));
+				syncServicePort.createChatMessage(
+					syncDtoMapper.toChatDto(NotificationKafkaRequestDto.toDto(savedChatMessage, offlineReceiverUuids)));
 			}
 		});
 	}

@@ -2,7 +2,6 @@ package lookids.mono.user.userprofile.application;
 
 import lookids.mono.user.userprofile.dto.in.UserProfileImgDto;
 import lookids.mono.user.userprofile.dto.in.UserProfileNicknameDto;
-import lookids.mono.user.userprofile.dto.in.UserProfileRequestDto;
 import lookids.mono.user.userprofile.dto.in.UserProfileTierDto;
 import lookids.mono.user.userprofile.dto.in.UserProfileUpdateDto;
 import lookids.mono.user.userprofile.dto.out.FollowKafkaDto;
@@ -13,7 +12,7 @@ import lookids.mono.user.userprofile.vo.in.FollowEventVo;
 import lookids.mono.user.userprofile.vo.in.ReplyEventVo;
 
 public interface UserProfileService {
-	void createUserProfile(UserProfileRequestDto userProfileRequestDto);
+	//void createUserProfile(UserProfileRequestDto userProfileRequestDto);
 
 	void createUserProfileService(String uuid, String nickname);
 
