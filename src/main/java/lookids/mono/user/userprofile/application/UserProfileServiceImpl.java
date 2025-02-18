@@ -3,13 +3,14 @@ package lookids.mono.user.userprofile.application;
 import java.util.Random;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lookids.mono.common.entity.BaseResponseStatus;
 import lookids.mono.common.exception.BaseException;
+import lookids.mono.sync.application.mapper.SyncDtoMapper;
+import lookids.mono.sync.application.port.in.SyncServicePort;
 import lookids.mono.user.userprofile.domain.UserProfile;
 import lookids.mono.user.userprofile.dto.in.UserProfileImgDto;
 import lookids.mono.user.userprofile.dto.in.UserProfileNicknameDto;
@@ -23,9 +24,6 @@ import lookids.mono.user.userprofile.infrastructure.UserProfileRepository;
 import lookids.mono.user.userprofile.vo.in.FeedEventVo;
 import lookids.mono.user.userprofile.vo.in.FollowEventVo;
 import lookids.mono.user.userprofile.vo.in.ReplyEventVo;
-import lookids.mono.user.userprofile.vo.out.NicknameKafkaVo;
-import lookids.mono.user.userprofile.vo.out.ProfileImageKafkaVo;
-import lookids.mono.user.userprofile.vo.out.UserProfileKafkaVo;
 
 @Service
 @RequiredArgsConstructor
@@ -34,11 +32,14 @@ public class UserProfileServiceImpl implements UserProfileService {
 
 	private final UserProfileRepository userProfileRepository;
 
-	@Value("${profile.crate}")
-	private String profileCreateTopic;
+	private final SyncServicePort syncServicePort;
+	private final SyncDtoMapper syncDtoMapper;
 
-	@Value("${profile.image.update}")
-	private String imageUpdateTopic;
+	//@Value("${profile.crate}")
+	//private String profileCreateTopic;
+
+	// @Value("${profile.image.update}")
+	// private String imageUpdateTopic;
 
 	@Value("${profile.nickname.update}")
 	private String nicknameUpdateTopic;
@@ -46,14 +47,14 @@ public class UserProfileServiceImpl implements UserProfileService {
 	@Value("${profile.delete}")
 	private String profileDeleteTopic;
 
-	@Override
-	public void createUserProfile(UserProfileRequestDto userProfileRequestDto) {
-
-		UserProfile userProfile = userProfileRepository.save(
-			userProfileRequestDto.toEntity(generateUniqueTag(userProfileRequestDto.getNickname()),
-				generateRandomImage()));
-		sendMessage(profileCreateTopic, UserProfileKafkaDto.toDto(userProfile).toVo());
-	}
+	// @Override
+	// public void createUserProfile(UserProfileRequestDto userProfileRequestDto) {
+	//
+	// 	UserProfile userProfile = userProfileRepository.save(
+	// 		userProfileRequestDto.toEntity(generateUniqueTag(userProfileRequestDto.getNickname()),
+	// 			generateRandomImage()));
+	// 	sendMessage(profileCreateTopic, UserProfileKafkaDto.toDto(userProfile).toVo());
+	// }
 
 	@Override
 	public void createUserProfileService(String uuid, String nickname) {
@@ -61,7 +62,7 @@ public class UserProfileServiceImpl implements UserProfileService {
 		UserProfile userProfile = userProfileRepository.save(
 			userProfileRequestDto.toEntity(generateUniqueTag(userProfileRequestDto.getNickname()),
 				generateRandomImage()));
-		sendMessage(profileCreateTopic, UserProfileKafkaDto.toDto(userProfile).toVo());
+		syncServicePort.createUserProfile(syncDtoMapper.toUserProfileDto(UserProfileKafkaDto.toDto(userProfile)));
 	}
 
 	@Override
@@ -71,14 +72,14 @@ public class UserProfileServiceImpl implements UserProfileService {
 		userProfileRepository.save(userProfileUpdateDto.toUpdate(userProfile));
 	}
 
-	private final KafkaTemplate<String, ProfileImageKafkaVo> imageKafkaTemplate;
+	//private final KafkaTemplate<String, ProfileImageKafkaVo> imageKafkaTemplate;
 
 	@Override
 	public void updateUserProfileImage(UserProfileImgDto userProfileImgDto) {
 		UserProfile userProfile = userProfileRepository.findByUserUuid(userProfileImgDto.getUserUuid())
 			.orElseThrow(() -> new BaseException(BaseResponseStatus.NO_EXIST_DATA));
 		UserProfile newProfile = userProfileRepository.save(userProfileImgDto.toEntity(userProfile));
-		imageKafkaTemplate.send(imageUpdateTopic, UserProfileKafkaDto.toDto(newProfile).toImageVo());
+		syncServicePort.updateUserProfileImage(syncDtoMapper.toUserProfileDto(UserProfileKafkaDto.toDto(userProfile)));
 	}
 
 	@Override
@@ -93,10 +94,10 @@ public class UserProfileServiceImpl implements UserProfileService {
 		UserProfile userProfile = userProfileRepository.findByUserUuid(userUuid)
 			.orElseThrow(() -> new BaseException(BaseResponseStatus.NO_EXIST_DATA));
 		userProfileRepository.deleteById(userProfile.getId());
-		sendMessage(profileDeleteTopic, UserProfileKafkaDto.toDto(userProfile).toVo());
+		//sendMessage(profileDeleteTopic, UserProfileKafkaDto.toDto(userProfile).toVo());
 	}
 
-	private final KafkaTemplate<String, NicknameKafkaVo> nicknameKafkaTemplate;
+	//private final KafkaTemplate<String, NicknameKafkaVo> nicknameKafkaTemplate;
 
 	@Override
 	public void updateUserProfileNickname(UserProfileNicknameDto userProfileNicknameDto) {
@@ -104,7 +105,8 @@ public class UserProfileServiceImpl implements UserProfileService {
 			.orElseThrow(() -> new BaseException(BaseResponseStatus.NO_EXIST_DATA));
 		UserProfile newProfile = userProfileRepository.save(
 			userProfileNicknameDto.toEntity(userProfile, generateUniqueTag(userProfileNicknameDto.getNickname())));
-		nicknameKafkaTemplate.send(nicknameUpdateTopic, UserProfileKafkaDto.toDto(newProfile).toNicknameVo());
+		syncServicePort.updateUserProfileNickname(
+			syncDtoMapper.toUserProfileDto(UserProfileKafkaDto.toDto(userProfile)));
 	}
 
 	@Override
@@ -152,7 +154,7 @@ public class UserProfileServiceImpl implements UserProfileService {
 		return tag;
 	}
 
-	private final KafkaTemplate<String, UserProfileKafkaVo> userProfileKafkaTemplate;
+	//private final KafkaTemplate<String, UserProfileKafkaVo> userProfileKafkaTemplate;
 
 	// @Value("${comment.join}")
 	// private String commentJoinTopic;

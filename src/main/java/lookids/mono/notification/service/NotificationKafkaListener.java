@@ -4,7 +4,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-import org.springframework.kafka.KafkaException;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 
@@ -58,25 +57,25 @@ public class NotificationKafkaListener {
 					sseService.sendSseNotification(receiverUuid, notification); // SSE 알림 전송
 					Optional<FcmToken> tmpFcm = fcmTokenRepository.findByUuid(receiverUuid);
 
-					if (tmpFcm.isPresent()) {
-						tmpFcm.get().getFcmTokenList().forEach(token -> {
-							log.info("Sending push notification to token: {}", token);
-							pushService.sendPushNotification(token, notification); // FCM 푸시 알림 전송
-						});
-					}
+					// if (tmpFcm.isPresent()) {
+					// 	tmpFcm.get().getFcmTokenList().forEach(token -> {
+					// 		log.info("Sending push notification to token: {}", token);
+					// 		pushService.sendPushNotification(token, notification); // FCM 푸시 알림 전송
+					// 	});
+					// }
 				} catch (Exception e) {
 					log.error("Failed to send notification to user: {}", receiverUuid, e);
-					throw new KafkaException("Notification processing failed", e);  // 예외 던져 Kafka 재시도 유도
+					//throw new KafkaException("Notification processing failed", e);  // 예외 던져 Kafka 재시도 유도
 				}
 			});
 
 		} catch (Exception e) {
 			log.error("Failed to process feed notification event: {}", notificationFeedRequestDto, e);
-			throw new KafkaException("Notification event processing failed", e);  // 전체 처리 실패 시
+			//throw new KafkaException("Notification event processing failed", e);  // 전체 처리 실패 시
 		}
 	}
 
-	@KafkaListener(topics = "${topic.chatting.create}", groupId = "${consumer-group-id.chatting}", containerFactory = "notificationChattingEventListenerContainerFactory")
+	//@KafkaListener(topics = "${topic.chatting.create}", groupId = "${consumer-group-id.chatting}", containerFactory = "notificationChattingEventListenerContainerFactory")
 	public void consumeChattingNotificationEvent(NotificationChattingRequestDto notificationChattingRequestDto) {
 
 		String chatContent = notificationChattingRequestDto.getContent();
@@ -112,7 +111,7 @@ public class NotificationKafkaListener {
 
 	}
 
-	@KafkaListener(topics = "${topic.feed.favorite}", groupId = "${consumer-group-id.favorite}", containerFactory = "notificationFavoriteEventListenerContainerFactory")
+	//@KafkaListener(topics = "${topic.feed.favorite}", groupId = "${consumer-group-id.favorite}", containerFactory = "notificationFavoriteEventListenerContainerFactory")
 	public void consumeFeedFavoriteNotificationEvent(NotificationFavoriteRequestDto notificationFavoriteRequestDto) {
 		log.info("consumeNotificationEvent: {}", notificationFavoriteRequestDto.getType().toUpperCase());
 		log.info("consumeNotificationEvent: {}", "게시글 좋아요");
@@ -144,7 +143,7 @@ public class NotificationKafkaListener {
 
 	}
 
-	@KafkaListener(topics = "${topic.comment.favorite}", groupId = "${consumer-group-id.favorite}", containerFactory = "notificationFavoriteEventListenerContainerFactory")
+	//@KafkaListener(topics = "${topic.comment.favorite}", groupId = "${consumer-group-id.favorite}", containerFactory = "notificationFavoriteEventListenerContainerFactory")
 	public void consumeCommentFavoriteNotificationEvent(NotificationFavoriteRequestDto notificationFavoriteRequestDto) {
 		log.info("consumeNotificationEvent: {}", notificationFavoriteRequestDto.getType().toUpperCase());
 		log.info("consumeNotificationEvent: {}", "댓글 좋아요");
@@ -205,7 +204,7 @@ public class NotificationKafkaListener {
 
 	}
 
-	@KafkaListener(topics = "${topic.comment.create}", groupId = "${consumer-group-id.comment}", containerFactory = "notificationCommentEventListenerContainerFactory")
+	//@KafkaListener(topics = "${topic.comment.create}", groupId = "${consumer-group-id.comment}", containerFactory = "notificationCommentEventListenerContainerFactory")
 	public void consumeCommentNotificationEvent(NotificationCommentRequestDto notificationCommentRequestDto) {
 		try {
 
@@ -236,26 +235,26 @@ public class NotificationKafkaListener {
 
 					Optional<FcmToken> tmpFcm = fcmTokenRepository.findByUuid(receiverUuid);
 
-					if (tmpFcm.isPresent()) {
-						tmpFcm.get().getFcmTokenList().forEach(token -> {
-							log.info("Sending push notification to token: {}", token);
-							pushService.sendPushNotification(token, notification); // FCM 푸시 알림 전송
-						});
-					}
+					// if (tmpFcm.isPresent()) {
+					// 	tmpFcm.get().getFcmTokenList().forEach(token -> {
+					// 		log.info("Sending push notification to token: {}", token);
+					// 		pushService.sendPushNotification(token, notification); // FCM 푸시 알림 전송
+					// 	});
+					// }
 
 				} catch (Exception e) {
 					log.error("Failed to process comment notification event: {}", notificationCommentRequestDto, e);
-					throw new KafkaException("Notification event processing failed", e);  // 전체 처리 실패 시
+					//throw new KafkaException("Notification event processing failed", e);  // 전체 처리 실패 시
 				}
 			});
 		} catch (Exception e) {
 			log.error("Failed to process comment notification event: {}", notificationCommentRequestDto, e);
-			throw new KafkaException("Notification event processing failed", e);  // 전체 처리 실패 시
+			//throw new KafkaException("Notification event processing failed", e);  // 전체 처리 실패 시
 		}
 
 	}
 
-	@KafkaListener(topics = "${topic.comment.reply.create}", groupId = "${consumer-group-id.comment-reply}", containerFactory = "notificationCommentReplyEventListenerContainerFactory")
+	//@KafkaListener(topics = "${topic.comment.reply.create}", groupId = "${consumer-group-id.comment-reply}", containerFactory = "notificationCommentReplyEventListenerContainerFactory")
 	public void consumeCommentReplyNotificationEvent(
 		NotificationCommentReplyRequestDto notificationCommentReplyRequestDto) {
 

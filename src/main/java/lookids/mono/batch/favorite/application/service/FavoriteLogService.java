@@ -10,6 +10,7 @@ import lookids.mono.batch.favorite.application.mapper.FavoriteDtoMapper;
 import lookids.mono.batch.favorite.application.port.dto.FavoriteUpdateEventDto;
 import lookids.mono.batch.favorite.application.port.in.FavoriteLogUseCase;
 import lookids.mono.batch.favorite.application.port.out.FavoriteRepositoryPort;
+import lookids.mono.batch.favorite.domain.FavoriteType;
 import lookids.mono.batch.favorite.domain.model.FavoriteLog;
 
 @Slf4j
@@ -26,10 +27,14 @@ public class FavoriteLogService implements FavoriteLogUseCase {
 		if (!favoriteUpdateEventDto.getFavoriteState()) {
 			logType = "delete";
 		}
+		FavoriteType type = FavoriteType.FEED;
+		if ("COMMENT".equals(favoriteUpdateEventDto.getFavoriteType())) {
+			type = FavoriteType.COMMENT;
+		}
 		FavoriteLog favoriteLog = FavoriteLog.builder()
 			.uuid(favoriteUpdateEventDto.getUuid())
 			.targetCode(favoriteUpdateEventDto.getTargetCode())
-			.favoriteType(favoriteUpdateEventDto.getFavoriteType())
+			.favoriteType(type)
 			.logType(logType)
 			.createdAt(LocalDateTime.now())
 			.processed(false)

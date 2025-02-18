@@ -5,14 +5,29 @@ import org.springframework.stereotype.Component;
 import lookids.mono.auth.dto.in.AccountDeleteKafkaRequestDto;
 import lookids.mono.batch.comment.application.port.dto.CommentCreateBatchDto;
 import lookids.mono.batch.comment.application.port.dto.ReplyCreateBatchDto;
+import lookids.mono.batch.favorite.application.port.dto.FavoriteUpdateEventDto;
 import lookids.mono.chatting.dto.in.UserKafkaRequestDto;
+import lookids.mono.chatting.dto.out.NotificationKafkaRequestDto;
 import lookids.mono.comment.vo.out.CommentKafkaVo;
 import lookids.mono.comment.vo.out.ReplyKafkaVo;
 import lookids.mono.commentread.application.port.dto.CommentCreateEventDto;
 import lookids.mono.commentread.application.port.dto.CommentDeleteDto;
 import lookids.mono.commentread.application.port.dto.ReplyCreateEventDto;
 import lookids.mono.commentread.application.port.dto.ReplyDeleteDto;
+import lookids.mono.commentread.application.port.dto.UserProfileImageDto;
+import lookids.mono.commentread.application.port.dto.UserProfileNicknameDto;
+import lookids.mono.elasticsearch.dto.in.KafkaUserCreateDto;
+import lookids.mono.elasticsearch.dto.in.KafkaUserDeleteRequestDto;
+import lookids.mono.elasticsearch.dto.in.KafkaUserImageUpdateRequestDto;
+import lookids.mono.elasticsearch.dto.in.KafkaUserNicknameUpdateRequestDto;
+import lookids.mono.favorite.dto.FavoriteRequestDto;
+import lookids.mono.notification.dto.in.NotificationChattingRequestDto;
+import lookids.mono.notification.dto.in.NotificationCommentReplyRequestDto;
+import lookids.mono.notification.dto.in.NotificationCommentRequestDto;
+import lookids.mono.notification.dto.in.NotificationFavoriteRequestDto;
+import lookids.mono.sync.application.port.dto.ChatDto;
 import lookids.mono.sync.application.port.dto.CommentDto;
+import lookids.mono.sync.application.port.dto.FavoriteDto;
 import lookids.mono.sync.application.port.dto.ReplyDto;
 import lookids.mono.sync.application.port.dto.UserDeleteDto;
 import lookids.mono.sync.application.port.dto.UserProfileDto;
@@ -120,4 +135,112 @@ public class SyncDtoMapper {
 			.parentCommentCode(replyDto.getParentCommentCode())
 			.build();
 	}
+
+	public NotificationChattingRequestDto toNotificationChattingRequestDto(ChatDto chatDto) {
+		return NotificationChattingRequestDto.builder()
+			.senderUuid(chatDto.getSenderUuid())
+			.receiverUuidList(chatDto.getReceiverUuidList())
+			.roomId(chatDto.getRoomId())
+			.content(chatDto.getContent())
+			.mediaUrl(chatDto.getMediaUrl())
+			.build();
+	}
+
+	public ChatDto toChatDto(NotificationKafkaRequestDto notificationKafkaRequestDto) {
+		return ChatDto.builder()
+			.senderUuid(notificationKafkaRequestDto.getSenderUuid())
+			.receiverUuidList(notificationKafkaRequestDto.getReceiverUuidList())
+			.roomId(notificationKafkaRequestDto.getRoomId())
+			.content(notificationKafkaRequestDto.getContent())
+			.mediaUrl(notificationKafkaRequestDto.getMediaUrl())
+			.build();
+	}
+
+	public KafkaUserDeleteRequestDto toKafkaUserDeleteRequestDto(UserDeleteDto userDeleteDto) {
+		return KafkaUserDeleteRequestDto.builder().uuid(userDeleteDto.getUuid()).build();
+	}
+
+	public KafkaUserCreateDto toKafkaUserCreateDto(UserProfileDto userProfileDto) {
+		return KafkaUserCreateDto.builder()
+			.uuid(userProfileDto.getUserUuid())
+			.nickname(userProfileDto.getNickname())
+			.tag(userProfileDto.getTag())
+			.image(userProfileDto.getImage())
+			.build();
+	}
+
+	public UserProfileImageDto toUserProfileImageDto(UserProfileDto userProfileDto) {
+		return UserProfileImageDto.builder()
+			.userUuid(userProfileDto.getUserUuid())
+			.image(userProfileDto.getImage())
+			.build();
+	}
+
+	public KafkaUserImageUpdateRequestDto toKafkaUserImageUpdateRequestDto(UserProfileDto userProfileDto) {
+		return KafkaUserImageUpdateRequestDto.builder()
+			.uuid(userProfileDto.getUserUuid())
+			.image(userProfileDto.getImage())
+			.build();
+	}
+
+	public UserProfileNicknameDto toUserProfileNicknameDto(UserProfileDto userProfileDto) {
+		return UserProfileNicknameDto.builder()
+			.userUuid(userProfileDto.getUserUuid())
+			.nickname(userProfileDto.getNickname())
+			.tag(userProfileDto.getTag())
+			.build();
+	}
+
+	public KafkaUserNicknameUpdateRequestDto toUserNicknameUpdateRequestDto(UserProfileDto userProfileDto) {
+		return KafkaUserNicknameUpdateRequestDto.builder()
+			.uuid(userProfileDto.getUserUuid())
+			.nickname(userProfileDto.getNickname())
+			.tag(userProfileDto.getTag())
+			.build();
+	}
+
+	public NotificationCommentRequestDto toNotificationCommentRequestDto(CommentDto commentDto) {
+		return NotificationCommentRequestDto.builder()
+			.feedCode(commentDto.getFeedCode())
+			.uuid(commentDto.getUuid())
+			.content(commentDto.getContent())
+			.build();
+	}
+
+	public NotificationCommentReplyRequestDto toNotificationCommentReplyRequestDto(ReplyDto replyDto) {
+		return NotificationCommentReplyRequestDto.builder()
+			.feedCode(replyDto.getFeedCode())
+			.uuid(replyDto.getUuid())
+			.content(replyDto.getContent())
+			.build();
+	}
+
+	public FavoriteDto toFavoriteDto(FavoriteRequestDto favoriteRequestDto) {
+		return FavoriteDto.builder()
+			.uuid(favoriteRequestDto.getUuid())
+			.receiverUuid(favoriteRequestDto.getAuthorUuid())
+			.targetCode(favoriteRequestDto.getTargetCode())
+			.favoriteState(favoriteRequestDto.getFavoriteState())
+			.favoriteType(favoriteRequestDto.getFavoriteType().toString())
+			.build();
+	}
+
+	public FavoriteUpdateEventDto toFavoriteUpdateEventDto(FavoriteDto favoriteDto) {
+		return FavoriteUpdateEventDto.builder()
+			.uuid(favoriteDto.getUuid())
+			.targetCode(favoriteDto.getTargetCode())
+			.favoriteState(favoriteDto.getFavoriteState())
+			.favoriteType(favoriteDto.getFavoriteType())
+			.build();
+	}
+
+	public NotificationFavoriteRequestDto toNotificationFavoriteRequestDto(FavoriteDto favoriteDto) {
+		return NotificationFavoriteRequestDto.builder()
+			.senderUuid(favoriteDto.getUuid())
+			.receiverUuid(favoriteDto.getReceiverUuid())
+			.feedCode(favoriteDto.getTargetCode())
+			.type(favoriteDto.getFavoriteType())
+			.build();
+	}
+
 }

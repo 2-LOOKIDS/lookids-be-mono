@@ -15,7 +15,7 @@ import lookids.mono.elasticsearch.dto.in.KafkaFeedDeleteRequestDto;
 import lookids.mono.elasticsearch.dto.in.KafkaPetCreateRequestDto;
 import lookids.mono.elasticsearch.dto.in.KafkaPetDeleteRequestDto;
 import lookids.mono.elasticsearch.dto.in.KafkaPetUpdateRequestDto;
-import lookids.mono.elasticsearch.dto.in.KafkaUserCreateRequestDto;
+import lookids.mono.elasticsearch.dto.in.KafkaUserCreateDto;
 import lookids.mono.elasticsearch.dto.in.KafkaUserDeleteRequestDto;
 import lookids.mono.elasticsearch.dto.in.KafkaUserImageUpdateRequestDto;
 import lookids.mono.elasticsearch.dto.in.KafkaUserNicknameUpdateRequestDto;
@@ -73,14 +73,15 @@ public class SearchServiceImpl implements SearchService {
 		return searchPetList.map(SearchPetResponseDto::toDto);
 	}
 
-	@KafkaListener(topics = "userprofile-create", groupId = "usercreate-group", containerFactory = "UserCreateContainerFactory")
-	public void consumeUserCreate(KafkaUserCreateRequestDto kafkaUserCreateRequestDto) {
+	@Override
+	//@KafkaListener(topics = "userprofile-create", groupId = "usercreate-group", containerFactory = "UserCreateContainerFactory")
+	public void consumeUserCreate(KafkaUserCreateDto kafkaUserCreateDto) {
 
 		SearchUser searchUser = SearchUser.builder()
-			.uuid(kafkaUserCreateRequestDto.getUuid())
-			.nickname(kafkaUserCreateRequestDto.getNickname())
-			.tag(kafkaUserCreateRequestDto.getTag())
-			.image(kafkaUserCreateRequestDto.getImage())
+			.uuid(kafkaUserCreateDto.getUuid())
+			.nickname(kafkaUserCreateDto.getNickname())
+			.tag(kafkaUserCreateDto.getTag())
+			.image(kafkaUserCreateDto.getImage())
 			.state(true)
 			.build();
 
@@ -88,7 +89,8 @@ public class SearchServiceImpl implements SearchService {
 
 	}
 
-	@KafkaListener(topics = "userprofile-nickname-update", groupId = "usernicknameupdate-group", containerFactory = "UserNicknameUpdateContainerFactory")
+	@Override
+	//@KafkaListener(topics = "userprofile-nickname-update", groupId = "usernicknameupdate-group", containerFactory = "UserNicknameUpdateContainerFactory")
 	public void consumeUserNicknameUpdate(KafkaUserNicknameUpdateRequestDto kafkaUserNicknameUpdateRequestDto) {
 
 		System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
@@ -99,7 +101,8 @@ public class SearchServiceImpl implements SearchService {
 
 	}
 
-	@KafkaListener(topics = "userprofile-image-update", groupId = "userimageupdate-group", containerFactory = "UserImageUpdateContainerFactory")
+	@Override
+	//@KafkaListener(topics = "userprofile-image-update", groupId = "userimageupdate-group", containerFactory = "UserImageUpdateContainerFactory")
 	public void consumeUserImageUpdate(KafkaUserImageUpdateRequestDto kafkaUserImageUpdateRequestDto) {
 
 		SearchUser searchUser = searchUserRepository.findByUuid(kafkaUserImageUpdateRequestDto.getUuid());
@@ -109,7 +112,8 @@ public class SearchServiceImpl implements SearchService {
 
 	}
 
-	@KafkaListener(topics = "account-delete", groupId = "userdelete-group", containerFactory = "UserDeleteContainerFactory")
+	@Override
+	//@KafkaListener(topics = "account-delete", groupId = "userdelete-group", containerFactory = "UserDeleteContainerFactory")
 	public void consumeUserDelete(KafkaUserDeleteRequestDto kafkaUserDeleteRequestDto) {
 
 		SearchUser searchUser = searchUserRepository.findByUuid(kafkaUserDeleteRequestDto.getUuid());
