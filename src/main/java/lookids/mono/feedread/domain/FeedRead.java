@@ -11,7 +11,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-import lookids.mono.feedread.dto.in.FeedKafkaDto;
+import lookids.mono.feedread.dto.in.FeedReadKafkaDto;
 import lookids.mono.feedread.dto.in.UserKafkaDto;
 
 @Getter
@@ -51,16 +51,16 @@ public class FeedRead {
 		this.tag = tag;
 	}
 
-	public static FeedRead toEntity(FeedKafkaDto feedKafkaDto, UserKafkaDto userKafkaDto) {
+	public static FeedRead toEntity(FeedReadKafkaDto feedReadKafkaDto, UserKafkaDto userKafkaDto) {
 		return FeedRead.builder()
-			.feedCode(feedKafkaDto.getFeedCode())
-			.uuid(feedKafkaDto.getUuid())
-			.content(feedKafkaDto.getContent())
-			.state(feedKafkaDto.isState())
-			.petCode(feedKafkaDto.getPetCode())
-			.tagList(feedKafkaDto.getTagList())
-			.mediaUrlList(feedKafkaDto.getMediaUrlList())
-			.createdAt(feedKafkaDto.getCreatedAt())
+			.feedCode(feedReadKafkaDto.getFeedCode())
+			.uuid(feedReadKafkaDto.getUuid())
+			.content(feedReadKafkaDto.getContent())
+			.state(feedReadKafkaDto.isState())
+			.petCode(feedReadKafkaDto.getPetCode())
+			.tagList(feedReadKafkaDto.getTagList())
+			.mediaUrlList(feedReadKafkaDto.getMediaUrlList())
+			.createdAt(feedReadKafkaDto.getCreatedAt())
 			.uuid(userKafkaDto.getUuid())
 			.nickname(userKafkaDto.getNickname())
 			.image(userKafkaDto.getImage())

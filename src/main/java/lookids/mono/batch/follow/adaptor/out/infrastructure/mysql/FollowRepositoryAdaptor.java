@@ -26,11 +26,15 @@ public class FollowRepositoryAdaptor implements FollowRepositoryPort {
 	private final FollowLogRepository followLogRepository;
 	private final FollowCountRepository followCountRepository;
 
-	public void createLog(List<FollowLogSaveDto> followLogSaveDtoList) {
-		List<FollowLogEntity> followLogEntityList = followLogSaveDtoList.stream()
-			.map(followEntityMapper::toFollowLogEntity)
-			.toList();
-		followLogRepository.saveAll(followLogEntityList);
+	// public void createLog(List<FollowLogSaveDto> followLogSaveDtoList) {
+	// 	List<FollowLogEntity> followLogEntityList = followLogSaveDtoList.stream()
+	// 		.map(followEntityMapper::toFollowLogEntity)
+	// 		.toList();
+	// 	followLogRepository.saveAll(followLogEntityList);
+	// }
+
+	public void createLog(FollowLogSaveDto followLogSaveDto) {
+		followLogRepository.save(followEntityMapper.toFollowLogEntity(followLogSaveDto));
 	}
 
 	@Override

@@ -12,7 +12,9 @@ import lookids.mono.batch.feed.domain.model.FeedCount;
 import lookids.mono.batch.feed.domain.model.FeedLog;
 
 public interface FeedRepositoryPort {
-	void createLog(List<FeedLogSaveDto> feedLogSaveDtoList);
+	//void createLog(List<FeedLogSaveDto> feedLogSaveDtoList);
+
+	void createLog(FeedLogSaveDto feedLogSaveDto);
 
 	FeedCount readFeedCount(String feedCode);
 

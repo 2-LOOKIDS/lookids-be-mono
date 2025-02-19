@@ -1,5 +1,7 @@
 package lookids.mono.followblock.block.application;
 
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -11,4 +13,6 @@ public interface BlockService {
 
 	// List<BlockResponseDto> readBlock(String userUuid);
 	Page<BlockResponseDto> readBlock(String userUuid, Pageable pageable);
+
+	List<String> blockListRequest(String uuid);
 }

@@ -22,7 +22,7 @@ import org.springframework.kafka.support.serializer.JsonDeserializer;
 import org.springframework.kafka.support.serializer.JsonSerializer;
 
 import lookids.mono.subscribe.dto.in.FeedKafkaRequestDto;
-import lookids.mono.subscribe.dto.in.NotificationKafkaRequestDto;
+import lookids.mono.subscribe.dto.in.NotificationRequestDto;
 
 @EnableKafka
 @Configuration
@@ -73,12 +73,12 @@ public class SubscribeKafkaConfig {
 	}
 
 	@Bean
-	public ProducerFactory<String, NotificationKafkaRequestDto> createFeedNotificationEvent() {
+	public ProducerFactory<String, NotificationRequestDto> createFeedNotificationEvent() {
 		return new DefaultKafkaProducerFactory<>(subscribeProducerConfigs());
 	}
 
 	@Bean
-	public KafkaTemplate<String, NotificationKafkaRequestDto> subscribekafkaTemplate() {
+	public KafkaTemplate<String, NotificationRequestDto> subscribekafkaTemplate() {
 		return new KafkaTemplate<>(createFeedNotificationEvent());
 	}
 

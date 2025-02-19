@@ -1,25 +1,39 @@
 package lookids.mono.sync.application.service;
 
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
 import lookids.mono.batch.comment.application.port.in.CommentLogUseCase;
 import lookids.mono.batch.favorite.application.port.in.FavoriteLogUseCase;
+import lookids.mono.batch.feed.application.port.in.FeedLogUseCase;
+import lookids.mono.batch.follow.application.port.in.FollowLogUseCase;
 import lookids.mono.chatting.application.UserKafkaListener;
 import lookids.mono.commentread.application.port.in.CommentDeleteUseCase;
 import lookids.mono.commentread.application.port.in.CommentReadCreateUseCase;
 import lookids.mono.commentread.application.port.in.UserProfileUpdateUseCase;
 import lookids.mono.elasticsearch.application.SearchService;
 import lookids.mono.favorite.application.FavoriteKafkaListener;
+import lookids.mono.feedread.application.FeedKafkaListener;
+import lookids.mono.feedread.application.FeedReadService;
+import lookids.mono.followblock.block.application.BlockService;
+import lookids.mono.followblock.follow.application.FollowService;
+import lookids.mono.map.application.MapService;
 import lookids.mono.notification.service.NotificationKafkaListener;
+import lookids.mono.subscribe.service.SubscribeKafkaListener;
 import lookids.mono.sync.application.mapper.SyncDtoMapper;
 import lookids.mono.sync.application.port.dto.ChatDto;
 import lookids.mono.sync.application.port.dto.CommentDto;
 import lookids.mono.sync.application.port.dto.FavoriteDto;
+import lookids.mono.sync.application.port.dto.FeedDeleteDto;
+import lookids.mono.sync.application.port.dto.FeedDto;
+import lookids.mono.sync.application.port.dto.FollowDto;
 import lookids.mono.sync.application.port.dto.ReplyDto;
 import lookids.mono.sync.application.port.dto.UserDeleteDto;
 import lookids.mono.sync.application.port.dto.UserProfileDto;
 import lookids.mono.sync.application.port.in.SyncServicePort;
+import lookids.mono.user.petprofile.application.PetProfileService;
 import lookids.mono.user.userprofile.application.UserProfileService;
 
 @RequiredArgsConstructor
@@ -36,19 +50,33 @@ public class SyncService implements SyncServicePort {
 	private final CommentDeleteUseCase commentDeleteUseCase;
 
 	private final FavoriteLogUseCase favoriteLogUseCase;
+	private final FeedLogUseCase feedLogUseCase;
+	private final FollowLogUseCase followLogUseCase;
 
 	private final FavoriteKafkaListener favoriteKafkaListener;
+
+	private final FeedReadService feedReadService;
+	private final FeedKafkaListener feedKafkaListener;
+
+	private final BlockService blockService;
+	private final FollowService followService;
+
+	private final MapService mapService;
 
 	private final SearchService searchService;
 
 	private final UserProfileService userProfileService;
+	private final PetProfileService petProfileService;
 
 	private final NotificationKafkaListener notificationKafkaListener;
+
+	private final SubscribeKafkaListener subscribeKafkaListener;
 
 	@Override
 	public void userDelete(UserDeleteDto userDeleteDto) {
 		userKafkaListener.userDelete(syncDtoMapper.toUserKafkaRequestDto(userDeleteDto));
 		searchService.consumeUserDelete(syncDtoMapper.toKafkaUserDeleteRequestDto(userDeleteDto));
+		feedKafkaListener.accountDeleteConsume(syncDtoMapper.toUuidKafkaDto(userDeleteDto));
 	}
 
 	@Override
@@ -99,12 +127,16 @@ public class SyncService implements SyncServicePort {
 	public void updateUserProfileImage(UserProfileDto userProfileDto) {
 		userProfileUpdateUseCase.updateProfileImage(syncDtoMapper.toUserProfileImageDto(userProfileDto));
 		searchService.consumeUserImageUpdate(syncDtoMapper.toKafkaUserImageUpdateRequestDto(userProfileDto));
+		followService.consumeUserImageUpdate(syncDtoMapper.toKafkaUserUpdateRequestDto(userProfileDto));
+		feedKafkaListener.imageUpdateConsume(syncDtoMapper.toUserImageKafkaDto(userProfileDto));
 	}
 
 	@Override
 	public void updateUserProfileNickname(UserProfileDto userProfileDto) {
 		userProfileUpdateUseCase.updateNickname(syncDtoMapper.toUserProfileNicknameDto(userProfileDto));
 		searchService.consumeUserNicknameUpdate(syncDtoMapper.toUserNicknameUpdateRequestDto(userProfileDto));
+		followService.consumeUserNicknameUpdate(syncDtoMapper.toKafkaUserUpdateRequestDto(userProfileDto));
+		feedKafkaListener.nickNameUpdateConsume(syncDtoMapper.toUserNickNameKafkaDto(userProfileDto));
 	}
 
 	@Override
@@ -122,5 +154,64 @@ public class SyncService implements SyncServicePort {
 	@Override
 	public void updateFavorite(FavoriteDto favoriteDto) {
 		favoriteLogUseCase.favoriteUpdate(syncDtoMapper.toFavoriteUpdateEventDto(favoriteDto));
+	}
+
+	@Override
+	public void createFeed(FeedDto feedDto) {
+		UserProfileDto userProfileDto = syncDtoMapper.toUserProfileDto(
+			userProfileService.consumeCommentEvent(feedDto.getUuid()));
+		feedReadService.feedConsume(syncDtoMapper.toFeedKafkaDto(feedDto),
+			syncDtoMapper.toUserKafkaDto(userProfileDto));
+		feedLogUseCase.feedCreateLog(syncDtoMapper.toFeedCreateEventDto(feedDto));
+		mapService.consumeFeedCreate(syncDtoMapper.toFeedCodeResponseDto(feedDto));
+		searchService.consumeFeedCreate(syncDtoMapper.toKafkaFeedCreateRequestDto(feedDto));
+
+		notificationKafkaListener.consumeFeedNotificationEvent(syncDtoMapper.toNotificationFeedRequestDto(
+			syncDtoMapper.toNotificationDto(
+				subscribeKafkaListener.consumeFeedEvent(syncDtoMapper.toFeedKafkaRequestDto(feedDto)))));
+	}
+
+	@Override
+	public void deleteFeed(FeedDeleteDto feedDeleteDto) {
+		feedLogUseCase.feedDeleteLog(syncDtoMapper.toFeedDeleteEventDto(feedDeleteDto));
+		feedKafkaListener.feedDeleteConsume(syncDtoMapper.toFeedDeleteKafkaDto(feedDeleteDto));
+		mapService.consumeFeedDelete(feedDeleteDto.getFeedCode());
+		searchService.consumeFeedDelete(feedDeleteDto.getFeedCode());
+	}
+
+	@Override
+	public void createFollow(FollowDto followDto) {
+		followLogUseCase.followCreateLog(syncDtoMapper.toFollowEventDto(followDto));
+		notificationKafkaListener.consumeFollowNotificationEvent(
+			syncDtoMapper.toNotificationFollowRequestDto(followDto));
+		followService.consumeFollowInfo(syncDtoMapper.toKafkaFollowDto(
+			syncDtoMapper.toFollowProfileDto(
+				userProfileService.consumeFollowEvent(followDto.getSenderUuid(), followDto.getReceiverUuid()))));
+
+	}
+
+	@Override
+	public void deleteFollow(FollowDto followDto) {
+		followLogUseCase.followDeleteLog(syncDtoMapper.toFollowEventDto(followDto));
+	}
+
+	@Override
+	public String readImageByPetCode(String petCode) {
+		return petProfileService.findPetImage(petCode);
+	}
+
+	@Override
+	public List<String> getFollowUuidList(String uuid) {
+		return followService.consumeForFollowUuid(uuid);
+	}
+
+	@Override
+	public List<String> getBlockUuidList(String uuid) {
+		return blockService.blockListRequest(uuid);
+	}
+
+	@Override
+	public List<String> getFavoriteFeedCodes(String uuid) {
+		return favoriteKafkaListener.consumeFeed(uuid);
 	}
 }

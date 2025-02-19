@@ -4,7 +4,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
@@ -30,7 +29,7 @@ public class NotificationKafkaListener {
 	private final NotificationSseService sseService;
 	private final NotificationPushService pushService;
 
-	@KafkaListener(topics = "${topic.feed.create}", groupId = "${consumer-group-id.feed}", concurrency = "50", containerFactory = "notificationFeedEventListenerContainerFactory")
+	//@KafkaListener(topics = "${topic.feed.create}", groupId = "${consumer-group-id.feed}", concurrency = "50", containerFactory = "notificationFeedEventListenerContainerFactory")
 	public void consumeFeedNotificationEvent(NotificationFeedRequestDto notificationFeedRequestDto) {
 		log.info("consumeNotificationEvent: {}", notificationFeedRequestDto.getType().toUpperCase());
 		log.info("consumeNotificationEvent: {}", notificationFeedRequestDto.getContent());
@@ -174,7 +173,7 @@ public class NotificationKafkaListener {
 
 	}
 
-	@KafkaListener(topics = "${topic.follow.create}", groupId = "${consumer-group-id.follow}", containerFactory = "notificationFollowEventListenerContainerFactory")
+	//@KafkaListener(topics = "${topic.follow.create}", groupId = "${consumer-group-id.follow}", containerFactory = "notificationFollowEventListenerContainerFactory")
 	public void consumeFollowNotificationEvent(NotificationFollowRequestDto notificationFollowRequestDto) {
 		log.info("consumeNotificationEvent: {}", notificationFollowRequestDto.getType().toUpperCase());
 		log.info("consumeNotificationEvent: {}", "팔로우");

@@ -4,23 +4,19 @@ import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.kafka.annotation.KafkaListener;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
 import lookids.mono.followblock.block.domain.Block;
 import lookids.mono.followblock.block.dto.in.BlockRequestDto;
-import lookids.mono.followblock.block.dto.in.KafkaBlockRequestDto;
 import lookids.mono.followblock.block.dto.out.BlockResponseDto;
-import lookids.mono.followblock.block.dto.out.KafkaBlockResponseDto;
 import lookids.mono.followblock.block.infrastructure.BlockRepository;
 
 @Service
 @RequiredArgsConstructor
 public class BlockServiceImpl implements BlockService {
 
-	private final KafkaTemplate<String, KafkaBlockResponseDto> blockResKafkaTemplate;
+	//private final KafkaTemplate<String, KafkaBlockResponseDto> blockResKafkaTemplate;
 	private final BlockRepository blockRepository;
 
 	@Override
@@ -41,21 +37,28 @@ public class BlockServiceImpl implements BlockService {
 		return blockedList;
 	}
 
-	@KafkaListener(topics = "block-request", groupId = "block-create", containerFactory = "BlockContainerFactory")
-	public void blockListRequest(KafkaBlockRequestDto kafkaBlockRequestDto) {
+	// @KafkaListener(topics = "block-request", groupId = "block-create", containerFactory = "BlockContainerFactory")
+	// public void blockListRequest(KafkaBlockRequestDto kafkaBlockRequestDto) {
+	//
+	// 	List<String> blockList = blockRepository.findByUuidAndStateTrue(kafkaBlockRequestDto.getUuid())
+	// 		.stream()
+	// 		.map(Block::getBlockedUuid)
+	// 		.toList();
+	//
+	// 	KafkaBlockResponseDto kafkaBlockResponseDto = KafkaBlockResponseDto.builder()
+	// 		.uuid(kafkaBlockRequestDto.getUuid())
+	// 		.blockUuid(blockList)
+	// 		.build();
+	//
+	// 	blockResKafkaTemplate.send("block-response", kafkaBlockResponseDto);
+	//
+	// }
+	@Override
+	public List<String> blockListRequest(String uuid) {
 
-		List<String> blockList = blockRepository.findByUuidAndStateTrue(kafkaBlockRequestDto.getUuid())
+		return blockRepository.findByUuidAndStateTrue(uuid)
 			.stream()
 			.map(Block::getBlockedUuid)
 			.toList();
-
-		KafkaBlockResponseDto kafkaBlockResponseDto = KafkaBlockResponseDto.builder()
-			.uuid(kafkaBlockRequestDto.getUuid())
-			.blockUuid(blockList)
-			.build();
-
-		blockResKafkaTemplate.send("block-response", kafkaBlockResponseDto);
-
 	}
-
 }

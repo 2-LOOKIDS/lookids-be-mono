@@ -26,12 +26,18 @@ public class FeedRepositoryAdaptor implements FeedRepositoryPort {
 	private final FeedLogRepository feedLogRepository;
 	private final FeedCountRepository feedCountRepository;
 
+	// @Override
+	// public void createLog(List<FeedLogSaveDto> feedLogSaveDtoList) {
+	// 	List<FeedLogEntity> feedLogEntityList = feedLogSaveDtoList.stream()
+	// 		.map(feedEntityMapper::toFeedLogEntity)
+	// 		.toList();
+	// 	feedLogRepository.saveAll(feedLogEntityList);
+	// }
+
 	@Override
-	public void createLog(List<FeedLogSaveDto> feedLogSaveDtoList) {
-		List<FeedLogEntity> feedLogEntityList = feedLogSaveDtoList.stream()
-			.map(feedEntityMapper::toFeedLogEntity)
-			.toList();
-		feedLogRepository.saveAll(feedLogEntityList);
+	public void createLog(FeedLogSaveDto feedLogSaveDto) {
+		FeedLogEntity feedLogEntity = feedEntityMapper.toFeedLogEntity(feedLogSaveDto);
+		feedLogRepository.save(feedLogEntity);
 	}
 
 	@Override

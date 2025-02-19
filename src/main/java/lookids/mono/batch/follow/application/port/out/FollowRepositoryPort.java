@@ -12,7 +12,9 @@ import lookids.mono.batch.follow.domain.model.FollowCount;
 import lookids.mono.batch.follow.domain.model.FollowLog;
 
 public interface FollowRepositoryPort {
-	void createLog(List<FollowLogSaveDto> followLogSaveDtoList);
+	//void createLog(List<FollowLogSaveDto> followLogSaveDtoList);
+
+	void createLog(FollowLogSaveDto followLogSaveDto);
 
 	FollowCount readFollowCount(String uuid);
 
