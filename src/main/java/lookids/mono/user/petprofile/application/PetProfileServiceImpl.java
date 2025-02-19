@@ -3,7 +3,6 @@ package lookids.mono.user.petprofile.application;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,7 +18,6 @@ import lookids.mono.user.petprofile.dto.in.PetProfileUpdateDto;
 import lookids.mono.user.petprofile.dto.in.PetProfileWeightDto;
 import lookids.mono.user.petprofile.dto.out.PetProfileResponseDto;
 import lookids.mono.user.petprofile.infrastructure.PetProfileRepository;
-import lookids.mono.user.petprofile.vo.in.FeedKafkaVo;
 import lookids.mono.user.petprofile.vo.out.PetProfileDeleteKafkaVo;
 import lookids.mono.user.petprofile.vo.out.PetProfileKafkaVo;
 import lookids.mono.user.petprofile.vo.out.PetProfileSearchKafkaVo;
@@ -108,17 +106,28 @@ public class PetProfileServiceImpl implements PetProfileService {
 		return petProfileList.stream().map(PetProfileResponseDto::toDto).toList();
 	}
 
-	@Value("${petprofile.out}")
-	private String petProfileTopic;
+	// @Value("${petprofile.out}")
+	// private String petProfileTopic;
 
-	@KafkaListener(topics = "${feed.petprofile}", groupId = "${group-id.user}", containerFactory = "feedUserKafkaListenerContainerFactory")
-	public void consumeFeedEvent(FeedKafkaVo feedKafkaVo) {
+	// @KafkaListener(topics = "${feed.petprofile}", groupId = "${group-id.user}", containerFactory = "feedUserKafkaListenerContainerFactory")
+	// public void consumeFeedEvent(FeedKafkaVo feedKafkaVo) {
+	//
+	// 	log.info("consumeFeedKafkaVo: {}", feedKafkaVo);
+	//
+	// 	PetProfile petProfile = petProfileRepository.findByPetCode(feedKafkaVo.getPetCode())
+	// 		.orElseThrow(() -> new BaseException(BaseResponseStatus.NO_EXIST_DATA));
+	//
+	// 	petProfileKafkaTemplate.send(petProfileTopic, PetProfileResponseDto.toDto(petProfile).toKafkaVo());
+	// }
 
-		log.info("consumeFeedKafkaVo: {}", feedKafkaVo);
+	@Override
+	public String findPetImage(String petCode) {
 
-		PetProfile petProfile = petProfileRepository.findByPetCode(feedKafkaVo.getPetCode())
+		log.info("consumeFeedKafkaVo: {}", petCode);
+
+		PetProfile petProfile = petProfileRepository.findByPetCode(petCode)
 			.orElseThrow(() -> new BaseException(BaseResponseStatus.NO_EXIST_DATA));
 
-		petProfileKafkaTemplate.send(petProfileTopic, PetProfileResponseDto.toDto(petProfile).toKafkaVo());
+		return petProfile.getImage();
 	}
 }

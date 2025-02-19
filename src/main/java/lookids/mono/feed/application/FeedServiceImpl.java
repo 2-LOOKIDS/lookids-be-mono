@@ -1,6 +1,5 @@
 package lookids.mono.feed.application;
 
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
@@ -12,6 +11,8 @@ import lookids.mono.feed.dto.in.DeleteKafkaDto;
 import lookids.mono.feed.dto.in.FeedKafkaDto;
 import lookids.mono.feed.dto.in.FeedRequestDto;
 import lookids.mono.feed.infrastructure.FeedRepository;
+import lookids.mono.sync.application.mapper.SyncDtoMapper;
+import lookids.mono.sync.application.port.in.SyncServicePort;
 
 @Slf4j
 @Service
@@ -19,14 +20,19 @@ import lookids.mono.feed.infrastructure.FeedRepository;
 public class FeedServiceImpl implements FeedService {
 
 	private final FeedRepository feedRepository;
-	private final KafkaTemplate<String, FeedKafkaDto> feedkafkaTemplate;
-	private final KafkaTemplate<String, DeleteKafkaDto> deletekafkaTemplate;
+	//private final KafkaTemplate<String, FeedKafkaDto> feedkafkaTemplate;
+	//private final KafkaTemplate<String, DeleteKafkaDto> deletekafkaTemplate;
+
+	private final SyncServicePort syncServicePort;
+	private final SyncDtoMapper syncDtoMapper;
 
 	@Override
 	public void createFeed(FeedRequestDto feedRequestDto) {
 		Feed savefeed = feedRepository.save(feedRequestDto.toEntity());
 		FeedKafkaDto feedKafkaDto = feedRequestDto.toDto(savefeed);
-		feedkafkaTemplate.send("feed-create", feedKafkaDto);
+		//feedkafkaTemplate.send("feed-create", feedKafkaDto);
+		syncServicePort.createFeed(syncDtoMapper.toFeedDto(feedKafkaDto));
+
 	}
 
 	@Override
@@ -35,6 +41,7 @@ public class FeedServiceImpl implements FeedService {
 			.orElseThrow(() -> new BaseException(BaseResponseStatus.NO_EXIST_FEED));
 		feedRepository.save(FeedRequestDto.toDelete(feed).toEntityForUpdate());
 		DeleteKafkaDto deleteKafkaDto = DeleteKafkaDto.toDto(feedCode, uuid);
-		deletekafkaTemplate.send("feed-delete", deleteKafkaDto);
+		//deletekafkaTemplate.send("feed-delete", deleteKafkaDto);
+		syncServicePort.deleteFeed(syncDtoMapper.toFeedDeleteDto(deleteKafkaDto));
 	}
 }

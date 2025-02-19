@@ -7,9 +7,6 @@ import lookids.mono.user.userprofile.dto.in.UserProfileUpdateDto;
 import lookids.mono.user.userprofile.dto.out.FollowKafkaDto;
 import lookids.mono.user.userprofile.dto.out.UserProfileKafkaDto;
 import lookids.mono.user.userprofile.dto.out.UserProfileResponseDto;
-import lookids.mono.user.userprofile.vo.in.FeedEventVo;
-import lookids.mono.user.userprofile.vo.in.FollowEventVo;
-import lookids.mono.user.userprofile.vo.in.ReplyEventVo;
 
 public interface UserProfileService {
 	//void createUserProfile(UserProfileRequestDto userProfileRequestDto);
@@ -32,9 +29,5 @@ public interface UserProfileService {
 
 	UserProfileKafkaDto consumeCommentEvent(String uuid);
 
-	UserProfileKafkaDto consumeReplyEvent(ReplyEventVo replyEventVo);
-
-	UserProfileKafkaDto consumeFeedEvent(FeedEventVo feedEventVo);
-
-	FollowKafkaDto consumeFollowEvent(FollowEventVo feedEventVo);
+	FollowKafkaDto consumeFollowEvent(String senderUuid, String receiverUuid);
 }

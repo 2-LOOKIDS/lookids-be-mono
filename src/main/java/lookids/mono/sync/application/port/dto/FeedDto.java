@@ -1,4 +1,4 @@
-package lookids.mono.feedread.dto.in;
+package lookids.mono.sync.application.port.dto;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -6,13 +6,10 @@ import java.util.List;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.ToString;
 
 @Getter
 @NoArgsConstructor
-@ToString
-public class FeedKafkaDto {
-
+public class FeedDto {
 	private String feedCode;
 	private String uuid;
 	private List<String> petCode;
@@ -23,7 +20,7 @@ public class FeedKafkaDto {
 	private LocalDateTime createdAt;
 
 	@Builder
-	public FeedKafkaDto(String feedCode, String uuid, List<String> petCode, String content, List<String> tagList,
+	public FeedDto(String feedCode, String uuid, List<String> petCode, String content, List<String> tagList,
 		boolean state, List<String> mediaUrlList, LocalDateTime createdAt) {
 		this.feedCode = feedCode;
 		this.uuid = uuid;

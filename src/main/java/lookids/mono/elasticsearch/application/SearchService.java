@@ -3,6 +3,7 @@ package lookids.mono.elasticsearch.application;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import lookids.mono.elasticsearch.dto.in.KafkaFeedCreateRequestDto;
 import lookids.mono.elasticsearch.dto.in.KafkaUserCreateDto;
 import lookids.mono.elasticsearch.dto.in.KafkaUserDeleteRequestDto;
 import lookids.mono.elasticsearch.dto.in.KafkaUserImageUpdateRequestDto;
@@ -28,5 +29,9 @@ public interface SearchService {
 	void consumeUserImageUpdate(KafkaUserImageUpdateRequestDto kafkaUserImageUpdateRequestDto);
 
 	void consumeUserDelete(KafkaUserDeleteRequestDto kafkaUserDeleteRequestDto);
+
+	void consumeFeedCreate(KafkaFeedCreateRequestDto kafkaFeedCreateRequestDto);
+
+	void consumeFeedDelete(String feedCode);
 
 }

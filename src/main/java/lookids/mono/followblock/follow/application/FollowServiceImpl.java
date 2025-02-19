@@ -6,8 +6,6 @@ import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.kafka.annotation.KafkaListener;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,15 +15,15 @@ import lookids.mono.followblock.follow.domain.Follow;
 import lookids.mono.followblock.follow.domain.FollowInfo;
 import lookids.mono.followblock.follow.dto.in.FollowRequestDto;
 import lookids.mono.followblock.follow.dto.in.KafkaFollowDto;
-import lookids.mono.followblock.follow.dto.in.KafkaFollowRequestDto;
 import lookids.mono.followblock.follow.dto.in.KafkaUserUpdateRequestDto;
 import lookids.mono.followblock.follow.dto.out.FollowInfoResponseDto;
 import lookids.mono.followblock.follow.dto.out.FollowResponseDto;
 import lookids.mono.followblock.follow.dto.out.KafkaAlarmFollowResponseDto;
 import lookids.mono.followblock.follow.dto.out.KafkaFollowResponseDto;
-import lookids.mono.followblock.follow.dto.out.KafkaFollowerResponseDto;
 import lookids.mono.followblock.follow.infrastructure.FollowInfoRepository;
 import lookids.mono.followblock.follow.infrastructure.FollowRepository;
+import lookids.mono.sync.application.mapper.SyncDtoMapper;
+import lookids.mono.sync.application.port.in.SyncServicePort;
 
 @Slf4j
 @Service
@@ -34,9 +32,12 @@ public class FollowServiceImpl implements FollowService {
 
 	private final FollowRepository followRepository;
 	private final FollowInfoRepository followInfoRepository;
-	private final KafkaTemplate<String, KafkaAlarmFollowResponseDto> alarmKafkaTemplate;
-	private final KafkaTemplate<String, KafkaFollowResponseDto> feedKafkaTemplate;
-	private final KafkaTemplate<String, KafkaFollowerResponseDto> followerKafkaTemplate;
+	// private final KafkaTemplate<String, KafkaAlarmFollowResponseDto> alarmKafkaTemplate;
+	// private final KafkaTemplate<String, KafkaFollowResponseDto> feedKafkaTemplate;
+	// private final KafkaTemplate<String, KafkaFollowerResponseDto> followerKafkaTemplate;
+
+	private final SyncServicePort syncServicePort;
+	private final SyncDtoMapper syncDtoMapper;
 
 	@Override
 	@Transactional
@@ -52,7 +53,8 @@ public class FollowServiceImpl implements FollowService {
 				.build();
 
 			followRepository.save(followRequestDto.toEntity());
-			alarmKafkaTemplate.send("follow-create", kafkaAlarmFollowResponseDto);
+			//alarmKafkaTemplate.send("follow-create", kafkaAlarmFollowResponseDto);
+			syncServicePort.createFollow(syncDtoMapper.toFollowDto(kafkaAlarmFollowResponseDto));
 			return true;
 
 		} else {
@@ -64,7 +66,8 @@ public class FollowServiceImpl implements FollowService {
 			followRepository.delete(existFollow.get());
 			followInfoRepository.deleteBySenderUuidAndReceiverUuid(followRequestDto.getFollowingUuid(),
 				followRequestDto.getFollowerUuid());
-			alarmKafkaTemplate.send("follow-delete", kafkaAlarmFollowResponseDto);
+			//alarmKafkaTemplate.send("follow-delete", kafkaAlarmFollowResponseDto);
+			syncServicePort.deleteFollow(syncDtoMapper.toFollowDto(kafkaAlarmFollowResponseDto));
 			return false;
 		}
 	}
@@ -95,34 +98,41 @@ public class FollowServiceImpl implements FollowService {
 		return followInfoRepository.findBySenderUuid(userUuid, pageable);
 	}
 
-	@KafkaListener(topics = "follow-request", groupId = "feed-group", containerFactory = "FeedFollowListenerContainerFactory")
-	public void consumeForFollowUuid(KafkaFollowRequestDto kafkaFollowRequestDto) {
-
-		String uuid = kafkaFollowRequestDto.getUuid();
+	// @KafkaListener(topics = "follow-request", groupId = "feed-group", containerFactory = "FeedFollowListenerContainerFactory")
+	// public void consumeForFollowUuid(KafkaFollowRequestDto kafkaFollowRequestDto) {
+	//
+	// 	String uuid = kafkaFollowRequestDto.getUuid();
+	// 	List<Follow> followList = followRepository.findByFollowingUuid(uuid);
+	//
+	// 	feedKafkaTemplate.send("follow-response", KafkaFollowResponseDto.toDto(uuid, followList));
+	//
+	// }
+	@Override
+	public List<String> consumeForFollowUuid(String uuid) {
 		List<Follow> followList = followRepository.findByFollowingUuid(uuid);
-
-		feedKafkaTemplate.send("follow-response", KafkaFollowResponseDto.toDto(uuid, followList));
-
+		return KafkaFollowResponseDto.toDto(uuid, followList).getFollowUuid();
 	}
 
-	@KafkaListener(topics = "follower-request", groupId = "feed-group", containerFactory = "FollowerListenerContainerFactory")
-	public void consumeForFollowerUuid(KafkaFollowRequestDto kafkaFollowRequestDto) {
+	// @KafkaListener(topics = "follower-request", groupId = "feed-group", containerFactory = "FollowerListenerContainerFactory")
+	// public void consumeForFollowerUuid(KafkaFollowRequestDto kafkaFollowRequestDto) {
+	//
+	// 	String uuid = kafkaFollowRequestDto.getUuid();
+	// 	List<Follow> followerList = followRepository.findByFollowerUuid(uuid);
+	//
+	// 	followerKafkaTemplate.send("follower-response", KafkaFollowerResponseDto.toDto(uuid, followerList));
+	//
+	// }
 
-		String uuid = kafkaFollowRequestDto.getUuid();
-		List<Follow> followerList = followRepository.findByFollowerUuid(uuid);
-
-		followerKafkaTemplate.send("follower-response", KafkaFollowerResponseDto.toDto(uuid, followerList));
-
-	}
-
-	@KafkaListener(topics = "userprofile-response", groupId = "feed-group", containerFactory = "FollowInfoContainerFactory")
+	//@KafkaListener(topics = "userprofile-response", groupId = "feed-group", containerFactory = "FollowInfoContainerFactory")
+	@Override
 	public void consumeFollowInfo(KafkaFollowDto kafkaFollowDto) {
 
 		followInfoRepository.save(kafkaFollowDto.toEntity());
 
 	}
 
-	@KafkaListener(topics = "userprofile-nickname-update", groupId = "es-group", containerFactory = "UserUpdateContainerFactory")
+	//@KafkaListener(topics = "userprofile-nickname-update", groupId = "es-group", containerFactory = "UserUpdateContainerFactory")
+	@Override
 	public void consumeUserNicknameUpdate(KafkaUserUpdateRequestDto kafkaUserUpdateRequestDto) {
 
 		List<FollowInfo> senderList = followInfoRepository.findBySenderUuid(kafkaUserUpdateRequestDto.getUuid());
@@ -160,7 +170,8 @@ public class FollowServiceImpl implements FollowService {
 
 	}
 
-	@KafkaListener(topics = "userprofile-image-update", groupId = "es-group", containerFactory = "UserUpdateContainerFactory")
+	//@KafkaListener(topics = "userprofile-image-update", groupId = "es-group", containerFactory = "UserUpdateContainerFactory")
+	@Override
 	public void consumeUserImageUpdate(KafkaUserUpdateRequestDto kafkaUserUpdateRequestDto) {
 
 		List<FollowInfo> sender = followInfoRepository.findBySenderUuid(kafkaUserUpdateRequestDto.getUuid());

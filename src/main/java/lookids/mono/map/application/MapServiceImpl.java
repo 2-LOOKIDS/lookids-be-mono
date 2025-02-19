@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
@@ -12,7 +11,6 @@ import lombok.extern.slf4j.Slf4j;
 import lookids.mono.common.entity.BaseResponseStatus;
 import lookids.mono.common.exception.BaseException;
 import lookids.mono.map.domain.Map;
-import lookids.mono.map.dto.in.KafkaFeedDeleteRequestDto;
 import lookids.mono.map.dto.in.PinReadDto;
 import lookids.mono.map.dto.in.PinRequestDto;
 import lookids.mono.map.dto.in.PinUpdateDto;
@@ -96,8 +94,9 @@ public class MapServiceImpl implements MapService {
 
 	}
 
-	@KafkaListener(topics = "feed-create", groupId = "map-group", containerFactory = "kafkaListenerContainerFactory")
-	public void consumeFeedCode(FeedCodeResponseDto feedCodeResponseDto) {
+	@Override
+	//@KafkaListener(topics = "feed-create", groupId = "map-group", containerFactory = "kafkaListenerContainerFactory")
+	public void consumeFeedCreate(FeedCodeResponseDto feedCodeResponseDto) {
 
 		String uuid = feedCodeResponseDto.getUuid();
 
@@ -110,9 +109,10 @@ public class MapServiceImpl implements MapService {
 		}
 	}
 
-	@KafkaListener(topics = "feed-delete", groupId = "feeddelete-group", containerFactory = "FeedDeleteContainerFactory")
-	public void consumeFeedCode(KafkaFeedDeleteRequestDto kafkaFeedDeleteRequestDto) {
-		String feedCode = kafkaFeedDeleteRequestDto.getFeedCode();
+	@Override
+	//@KafkaListener(topics = "feed-delete", groupId = "feeddelete-group", containerFactory = "FeedDeleteContainerFactory")
+	//public void consumeFeedDelete(KafkaFeedDeleteRequestDto kafkaFeedDeleteRequestDto) {
+	public void consumeFeedDelete(String feedCode) {
 		mapRepository.deleteByFeedCode(feedCode);
 	}
 }

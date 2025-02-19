@@ -8,6 +8,7 @@ import lookids.mono.map.dto.in.PinReadDto;
 import lookids.mono.map.dto.in.PinRequestDto;
 import lookids.mono.map.dto.in.PinUpdateDto;
 import lookids.mono.map.dto.out.DetailPinResponseDto;
+import lookids.mono.map.dto.out.FeedCodeResponseDto;
 import lookids.mono.map.dto.out.PinResponseDto;
 
 @Service
@@ -26,5 +27,9 @@ public interface MapService {
 	void updatePin(PinUpdateDto pinUpdateDto);
 
 	void deletePin(String pinCode);
+
+	void consumeFeedCreate(FeedCodeResponseDto feedCodeResponseDto);
+
+	void consumeFeedDelete(String feedCode);
 
 }

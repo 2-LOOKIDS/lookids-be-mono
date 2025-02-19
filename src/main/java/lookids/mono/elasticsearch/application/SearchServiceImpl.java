@@ -11,7 +11,6 @@ import lookids.mono.elasticsearch.domain.SearchFeed;
 import lookids.mono.elasticsearch.domain.SearchPet;
 import lookids.mono.elasticsearch.domain.SearchUser;
 import lookids.mono.elasticsearch.dto.in.KafkaFeedCreateRequestDto;
-import lookids.mono.elasticsearch.dto.in.KafkaFeedDeleteRequestDto;
 import lookids.mono.elasticsearch.dto.in.KafkaPetCreateRequestDto;
 import lookids.mono.elasticsearch.dto.in.KafkaPetDeleteRequestDto;
 import lookids.mono.elasticsearch.dto.in.KafkaPetUpdateRequestDto;
@@ -118,7 +117,7 @@ public class SearchServiceImpl implements SearchService {
 
 		SearchUser searchUser = searchUserRepository.findByUuid(kafkaUserDeleteRequestDto.getUuid());
 
-		SearchUser deleteUser = searchUser.builder()
+		SearchUser deleteUser = SearchUser.builder()
 			.id(searchUser.getId())
 			.uuid(searchUser.getUuid())
 			.tag(searchUser.getTag())
@@ -131,7 +130,8 @@ public class SearchServiceImpl implements SearchService {
 
 	}
 
-	@KafkaListener(topics = "feed-create", groupId = "feedcreate-group", containerFactory = "searchFeedCreateContainerFactory")
+	@Override
+	//@KafkaListener(topics = "feed-create", groupId = "feedcreate-group", containerFactory = "searchFeedCreateContainerFactory")
 	public void consumeFeedCreate(KafkaFeedCreateRequestDto kafkaFeedCreateRequestDto) {
 
 		SearchFeed searchFeed = SearchFeed.builder()
@@ -145,10 +145,11 @@ public class SearchServiceImpl implements SearchService {
 
 	}
 
-	@KafkaListener(topics = "feed-delete", groupId = "feeddelete-group", containerFactory = "searchFeedDeleteContainerFactory")
-	public void consumeFeedDelete(KafkaFeedDeleteRequestDto kafkaFeedDeleteRequestDto) {
-
-		kafkaBatchCollector.addFeedDeleteBatch(kafkaFeedDeleteRequestDto.getFeedCode());
+	@Override
+	//@KafkaListener(topics = "feed-delete", groupId = "feeddelete-group", containerFactory = "searchFeedDeleteContainerFactory")
+	// public void consumeFeedDelete(KafkaFeedDeleteRequestDto kafkaFeedDeleteRequestDto) {
+	public void consumeFeedDelete(String feedCode) {
+		kafkaBatchCollector.addFeedDeleteBatch(feedCode);
 
 	}
 

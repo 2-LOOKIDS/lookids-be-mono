@@ -2,7 +2,6 @@ package lookids.mono.user.userprofile.application;
 
 import java.util.Random;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
@@ -21,9 +20,6 @@ import lookids.mono.user.userprofile.dto.out.FollowKafkaDto;
 import lookids.mono.user.userprofile.dto.out.UserProfileKafkaDto;
 import lookids.mono.user.userprofile.dto.out.UserProfileResponseDto;
 import lookids.mono.user.userprofile.infrastructure.UserProfileRepository;
-import lookids.mono.user.userprofile.vo.in.FeedEventVo;
-import lookids.mono.user.userprofile.vo.in.FollowEventVo;
-import lookids.mono.user.userprofile.vo.in.ReplyEventVo;
 
 @Service
 @RequiredArgsConstructor
@@ -41,11 +37,11 @@ public class UserProfileServiceImpl implements UserProfileService {
 	// @Value("${profile.image.update}")
 	// private String imageUpdateTopic;
 
-	@Value("${profile.nickname.update}")
-	private String nicknameUpdateTopic;
-
-	@Value("${profile.delete}")
-	private String profileDeleteTopic;
+	// @Value("${profile.nickname.update}")
+	// private String nicknameUpdateTopic;
+	//
+	// @Value("${profile.delete}")
+	// private String profileDeleteTopic;
 
 	// @Override
 	// public void createUserProfile(UserProfileRequestDto userProfileRequestDto) {
@@ -194,16 +190,6 @@ public class UserProfileServiceImpl implements UserProfileService {
 	//
 	// 	sendMessage(replyJoinTopic, UserProfileKafkaDto.toDto(userProfile).toVo());
 	// }
-	@Override
-	public UserProfileKafkaDto consumeReplyEvent(ReplyEventVo replyEventVo) {
-
-		log.info("consumeReplyEvent: {}", replyEventVo);
-
-		UserProfile userProfile = userProfileRepository.findByUserUuid(replyEventVo.getUuid())
-			.orElseThrow(() -> new BaseException(BaseResponseStatus.NO_EXIST_DATA));
-
-		return UserProfileKafkaDto.toDto(userProfile);
-	}
 
 	// @KafkaListener(topics = "${feed.create}", groupId = "${group-id.user}", containerFactory = "feedUserListenerContainerFactory")
 	// public void consumeFeedEvent(FeedEventVo feedEventVo) {
@@ -215,16 +201,6 @@ public class UserProfileServiceImpl implements UserProfileService {
 	//
 	// 	sendMessage(feedJoinTopic, UserProfileKafkaDto.toDto(userProfile).toVo());
 	// }
-	@Override
-	public UserProfileKafkaDto consumeFeedEvent(FeedEventVo feedEventVo) {
-
-		log.info("consumeFeedEvent: {}", feedEventVo);
-
-		UserProfile userProfile = userProfileRepository.findByUserUuid(feedEventVo.getUuid())
-			.orElseThrow(() -> new BaseException(BaseResponseStatus.NO_EXIST_DATA));
-
-		return UserProfileKafkaDto.toDto(userProfile);
-	}
 
 	// private final KafkaTemplate<String, FollowKafkaVo> followJoinKafkaTemplate;
 	// @Value("${follow.join}")
@@ -243,13 +219,11 @@ public class UserProfileServiceImpl implements UserProfileService {
 	// 	followJoinKafkaTemplate.send(followJoinTopic, FollowKafkaDto.toDto(senderProfile, receiverProfile).toVo());
 	// }
 	@Override
-	public FollowKafkaDto consumeFollowEvent(FollowEventVo feedEventVo) {
+	public FollowKafkaDto consumeFollowEvent(String senderUuid, String receiverUuid) {
 
-		log.info("consumeFollowEvent: {}", feedEventVo);
-
-		UserProfile senderProfile = userProfileRepository.findByUserUuid(feedEventVo.getSenderUuid())
+		UserProfile senderProfile = userProfileRepository.findByUserUuid(senderUuid)
 			.orElseThrow(() -> new BaseException(BaseResponseStatus.NO_EXIST_DATA));
-		UserProfile receiverProfile = userProfileRepository.findByUserUuid(feedEventVo.getReceiverUuid())
+		UserProfile receiverProfile = userProfileRepository.findByUserUuid(receiverUuid)
 			.orElseThrow(() -> new BaseException(BaseResponseStatus.NO_EXIST_DATA));
 
 		return FollowKafkaDto.toDto(senderProfile, receiverProfile);

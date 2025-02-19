@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.kafka.annotation.KafkaListener;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,8 +15,6 @@ import lookids.mono.common.exception.BaseException;
 import lookids.mono.feedread.domain.FeedRead;
 import lookids.mono.feedread.dto.in.FeedDeleteKafkaDto;
 import lookids.mono.feedread.dto.in.PetImageKafkaDto;
-import lookids.mono.feedread.dto.in.TargetKafkaDto;
-import lookids.mono.feedread.dto.in.TargetRequestKafkaDto;
 import lookids.mono.feedread.dto.in.UserImageKafkaDto;
 import lookids.mono.feedread.dto.in.UserNickNameKafkaDto;
 import lookids.mono.feedread.dto.in.UuidKafkaDto;
@@ -29,13 +26,13 @@ import lookids.mono.feedread.infrastructure.FeedReadRepository;
 @ToString
 public class FeedKafkaListener {
 
-	private final KafkaTemplate<String, TargetRequestKafkaDto> recommendKafkaTemplate;
+	//private final KafkaTemplate<String, TargetRequestKafkaDto> recommendKafkaTemplate;
 
 	private final FeedReadRepository feedReadRepository;
 
 	@Transactional
-	@KafkaListener(topics = "userprofile-nickname-update", groupId = "feed-read-group", containerFactory = "userNickNameEventListenerContainerFactory")
-	public void NickNameUpdateConsume(UserNickNameKafkaDto userNickNameKafkaDto) {
+	//@KafkaListener(topics = "userprofile-nickname-update", groupId = "feed-read-group", containerFactory = "userNickNameEventListenerContainerFactory")
+	public void nickNameUpdateConsume(UserNickNameKafkaDto userNickNameKafkaDto) {
 		List<FeedRead> findUuid = feedReadRepository.findAllByUuid(userNickNameKafkaDto.getUuid());
 		if (findUuid.isEmpty()) {
 			throw new BaseException(BaseResponseStatus.NO_EXIST_FEED);
@@ -47,20 +44,20 @@ public class FeedKafkaListener {
 	}
 
 	@Transactional
-	@KafkaListener(topics = "userprofile-image-update", groupId = "feed-read-group", containerFactory = "userImageEventListenerContainerFactory")
-	public void ImageUpdateConsume(UserImageKafkaDto userImageKafkaDto) {
+	//@KafkaListener(topics = "userprofile-image-update", groupId = "feed-read-group", containerFactory = "userImageEventListenerContainerFactory")
+	public void imageUpdateConsume(UserImageKafkaDto userImageKafkaDto) {
 		List<FeedRead> findUuid = feedReadRepository.findAllByUuid(userImageKafkaDto.getUuid());
 		if (findUuid.isEmpty()) {
 			throw new BaseException(BaseResponseStatus.NO_EXIST_FEED);
 		}
-		List<FeedRead> ImageUpdate = findUuid.stream()
+		List<FeedRead> imageUpdate = findUuid.stream()
 			.map(userImageKafkaDto::toImageUpdate)
 			.collect(Collectors.toList());
-		feedReadRepository.saveAll(ImageUpdate);
+		feedReadRepository.saveAll(imageUpdate);
 	}
 
-	@KafkaListener(topics = "feed-delete", groupId = "feed-read-group", containerFactory = "deleteEventListenerContainerFactory")
-	public void FeedDeleteConsume(FeedDeleteKafkaDto feedDeleteKafkaDto) {
+	//@KafkaListener(topics = "feed-delete", groupId = "feed-read-group", containerFactory = "deleteEventListenerContainerFactory")
+	public void feedDeleteConsume(FeedDeleteKafkaDto feedDeleteKafkaDto) {
 		FeedRead feedRead = feedReadRepository.findByFeedCodeAndStateTrue(feedDeleteKafkaDto.getFeedCode())
 			.orElseThrow(() -> new BaseException(BaseResponseStatus.NO_EXIST_FEED));
 		FeedRead updatedFeedRead = feedDeleteKafkaDto.toUpdatedEntity(feedRead);
@@ -68,30 +65,30 @@ public class FeedKafkaListener {
 		feedReadRepository.save(updatedFeedRead);
 	}
 
-	@KafkaListener(topics = "recommend-user", groupId = "feed-read-group", containerFactory = "recommendEventListenerContainerFactory")
-	public void recommendTarget(TargetKafkaDto targetKafkaDto) {
-		List<FeedRead> findUuidList = feedReadRepository.findByFeedCodeIn(targetKafkaDto.getTargetCode());
-		List<String> uuidList = findUuidList.stream().map(FeedRead::getUuid).collect(Collectors.toList());
-		TargetRequestKafkaDto targetRequestKafkaDto = TargetRequestKafkaDto.toDto(targetKafkaDto.getAuthorUuid(),
-			uuidList);
-		recommendKafkaTemplate.send("recommend-user-response", targetRequestKafkaDto);
-	}
+	// @KafkaListener(topics = "recommend-user", groupId = "feed-read-group", containerFactory = "recommendEventListenerContainerFactory")
+	// public void recommendTarget(TargetKafkaDto targetKafkaDto) {
+	// 	List<FeedRead> findUuidList = feedReadRepository.findByFeedCodeIn(targetKafkaDto.getTargetCode());
+	// 	List<String> uuidList = findUuidList.stream().map(FeedRead::getUuid).collect(Collectors.toList());
+	// 	TargetRequestKafkaDto targetRequestKafkaDto = TargetRequestKafkaDto.toDto(targetKafkaDto.getAuthorUuid(),
+	// 		uuidList);
+	// 	recommendKafkaTemplate.send("recommend-user-response", targetRequestKafkaDto);
+	// }
 
 	@Transactional
 	@KafkaListener(topics = "petprofile-update", groupId = "feed-read-group", containerFactory = "petProfileEventListenerContainerFactory")
-	public void ImageUpdateConsume(PetImageKafkaDto petImageKafkaDto) {
+	public void petProfileUpdateConsume(PetImageKafkaDto petImageKafkaDto) {
 		List<FeedRead> findPetCode = feedReadRepository.findAllBypetCode(petImageKafkaDto.getPetCode());
 		if (findPetCode.isEmpty()) {
 			throw new BaseException(BaseResponseStatus.NO_EXIST_FEED);
 		}
-		List<FeedRead> ImageUpdate = findPetCode.stream()
+		List<FeedRead> imageUpdateList = findPetCode.stream()
 			.map(petImageKafkaDto::toImageUpdate)
-			.collect(Collectors.toList());
-		feedReadRepository.saveAll(ImageUpdate);
+			.toList();
+		feedReadRepository.saveAll(imageUpdateList);
 	}
 
-	@KafkaListener(topics = "account-delete", groupId = "feed-read-group", containerFactory = "accountDeleteEventListenerContainerFactory")
-	public void ImageUpdateConsume(UuidKafkaDto uuidKafkaDto) {
+	//@KafkaListener(topics = "account-delete", groupId = "feed-read-group", containerFactory = "accountDeleteEventListenerContainerFactory")
+	public void accountDeleteConsume(UuidKafkaDto uuidKafkaDto) {
 		List<FeedRead> findUuid = feedReadRepository.findAllByUuid(uuidKafkaDto.getUuid());
 		if (findUuid.isEmpty()) {
 			throw new BaseException(BaseResponseStatus.NO_EXIST_FEED);

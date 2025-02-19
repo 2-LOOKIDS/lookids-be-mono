@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
-public class NotificationKafkaRequestDto {
+public class NotificationRequestDto {
 	private String senderUuid;
 	private List<String> receiverUuidList;
 	private String feedCode;
@@ -17,7 +17,7 @@ public class NotificationKafkaRequestDto {
 	private String type;
 
 	@Builder
-	public NotificationKafkaRequestDto(String senderUuid, List<String> receiverUuidList, String feedCode,
+	public NotificationRequestDto(String senderUuid, List<String> receiverUuidList, String feedCode,
 		String content, String mediaUrl, String type) {
 		this.senderUuid = senderUuid;
 		this.receiverUuidList = receiverUuidList;
@@ -27,9 +27,9 @@ public class NotificationKafkaRequestDto {
 		this.type = type;
 	}
 
-	public static NotificationKafkaRequestDto toDto(FeedKafkaRequestDto kafkaFeedRequestDto,
+	public static NotificationRequestDto toDto(FeedKafkaRequestDto kafkaFeedRequestDto,
 		List<String> receiverUuidList, String splitedContent, String type) {
-		return NotificationKafkaRequestDto.builder()
+		return NotificationRequestDto.builder()
 			.senderUuid(kafkaFeedRequestDto.getUuid())
 			.receiverUuidList(receiverUuidList)
 			.feedCode(kafkaFeedRequestDto.getFeedCode())
