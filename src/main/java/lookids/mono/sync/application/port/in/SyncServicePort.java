@@ -8,6 +8,7 @@ import lookids.mono.sync.application.port.dto.FavoriteDto;
 import lookids.mono.sync.application.port.dto.FeedDeleteDto;
 import lookids.mono.sync.application.port.dto.FeedDto;
 import lookids.mono.sync.application.port.dto.FollowDto;
+import lookids.mono.sync.application.port.dto.PetProfileDto;
 import lookids.mono.sync.application.port.dto.ReplyDto;
 import lookids.mono.sync.application.port.dto.UserDeleteDto;
 import lookids.mono.sync.application.port.dto.UserProfileDto;
@@ -39,6 +40,16 @@ public interface SyncServicePort {
 
 	void deleteFeed(FeedDeleteDto feedDeleteDto);
 
+	void createFollow(FollowDto followDto);
+
+	void deleteFollow(FollowDto followDto);
+
+	void createPetProfile(PetProfileDto petProfileDto);
+
+	void updatePetProfile(PetProfileDto petProfileDto);
+
+	void deletePetProfile(String petCode);
+
 	String readImageByPetCode(String petCode);
 
 	List<String> getFollowUuidList(String uuid);
@@ -47,7 +58,4 @@ public interface SyncServicePort {
 
 	List<String> getFavoriteFeedCodes(String uuid);
 
-	void createFollow(FollowDto followDto);
-
-	void deleteFollow(FollowDto followDto);
 }

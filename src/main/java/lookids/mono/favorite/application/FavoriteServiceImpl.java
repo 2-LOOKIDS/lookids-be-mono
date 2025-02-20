@@ -85,4 +85,12 @@ public class FavoriteServiceImpl implements FavoriteService {
 		return true;
 	}
 
+	@Override
+	public List<String> consumeFeed(String uuid) {
+		//String uuid = requestDto.getUuid(); // UUID 추출
+		List<FavoriteResponseDto> responseDtos = readUserFavoriteList(uuid);
+		//sendMessage("favorite-response", favoriteFeedDto);
+		return responseDtos.stream().map(FavoriteResponseDto::getTargetCode).toList();
+	}
+
 }

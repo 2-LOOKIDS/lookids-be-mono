@@ -18,4 +18,6 @@ public interface FavoriteService {
 	Page<FavoriteResponseDto> readFeedFavoriteList(String targetCode, FavoriteType favoriteType, int page, int size);
 
 	Boolean readFavorite(String uuid, String targetCode);
+
+	List<String> consumeFeed(String uuid);
 }

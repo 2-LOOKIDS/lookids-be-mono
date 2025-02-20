@@ -2,8 +2,6 @@ package lookids.mono.feedread.application;
 
 import org.springframework.data.domain.Page;
 
-import lookids.mono.feedread.dto.in.FeedReadKafkaDto;
-import lookids.mono.feedread.dto.in.UserKafkaDto;
 import lookids.mono.feedread.dto.out.FeedListResponseDto;
 import lookids.mono.feedread.dto.out.FeedReadDetailResponseDto;
 import lookids.mono.feedread.dto.out.FeedReadResponseDto;
@@ -23,5 +21,5 @@ public interface FeedReadService {
 
 	Boolean readFeedCheck(String uuid, String feedCode);
 
-	void feedConsume(FeedReadKafkaDto feedReadKafkaDto, UserKafkaDto userKafkaDto);
+	//void feedConsume(FeedReadKafkaDto feedReadKafkaDto, UserKafkaDto userKafkaDto);
 }

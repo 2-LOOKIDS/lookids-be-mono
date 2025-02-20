@@ -4,6 +4,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import lookids.mono.elasticsearch.dto.in.KafkaFeedCreateRequestDto;
+import lookids.mono.elasticsearch.dto.in.KafkaPetCreateRequestDto;
+import lookids.mono.elasticsearch.dto.in.KafkaPetDeleteRequestDto;
+import lookids.mono.elasticsearch.dto.in.KafkaPetUpdateRequestDto;
 import lookids.mono.elasticsearch.dto.in.KafkaUserCreateDto;
 import lookids.mono.elasticsearch.dto.in.KafkaUserDeleteRequestDto;
 import lookids.mono.elasticsearch.dto.in.KafkaUserImageUpdateRequestDto;
@@ -33,5 +36,11 @@ public interface SearchService {
 	void consumeFeedCreate(KafkaFeedCreateRequestDto kafkaFeedCreateRequestDto);
 
 	void consumeFeedDelete(String feedCode);
+
+	void consumePetCreate(KafkaPetCreateRequestDto kafkaPetCreateRequestDto);
+
+	void consumePetUpdate(KafkaPetUpdateRequestDto kafkaPetUpdateRequestDto);
+
+	void consumePetDelete(KafkaPetDeleteRequestDto kafkaPetDeleteRequestDto);
 
 }

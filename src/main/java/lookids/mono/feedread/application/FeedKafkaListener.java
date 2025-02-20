@@ -3,7 +3,6 @@ package lookids.mono.feedread.application;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,8 +13,10 @@ import lookids.mono.common.entity.BaseResponseStatus;
 import lookids.mono.common.exception.BaseException;
 import lookids.mono.feedread.domain.FeedRead;
 import lookids.mono.feedread.dto.in.FeedDeleteKafkaDto;
+import lookids.mono.feedread.dto.in.FeedReadKafkaDto;
 import lookids.mono.feedread.dto.in.PetImageKafkaDto;
 import lookids.mono.feedread.dto.in.UserImageKafkaDto;
+import lookids.mono.feedread.dto.in.UserKafkaDto;
 import lookids.mono.feedread.dto.in.UserNickNameKafkaDto;
 import lookids.mono.feedread.dto.in.UuidKafkaDto;
 import lookids.mono.feedread.infrastructure.FeedReadRepository;
@@ -75,7 +76,7 @@ public class FeedKafkaListener {
 	// }
 
 	@Transactional
-	@KafkaListener(topics = "petprofile-update", groupId = "feed-read-group", containerFactory = "petProfileEventListenerContainerFactory")
+	//@KafkaListener(topics = "petprofile-update", groupId = "feed-read-group", containerFactory = "petProfileEventListenerContainerFactory")
 	public void petProfileUpdateConsume(PetImageKafkaDto petImageKafkaDto) {
 		List<FeedRead> findPetCode = feedReadRepository.findAllBypetCode(petImageKafkaDto.getPetCode());
 		if (findPetCode.isEmpty()) {
@@ -96,5 +97,9 @@ public class FeedKafkaListener {
 		List<FeedRead> feedDelete = findUuid.stream().map(uuidKafkaDto::toDelete).collect(Collectors.toList());
 		feedReadRepository.saveAll(feedDelete);
 	}
-
+	
+	public void feedConsume(FeedReadKafkaDto feedReadKafkaDto, UserKafkaDto userKafkaDto) {
+		FeedRead feedRead = FeedRead.toEntity(feedReadKafkaDto, userKafkaDto);
+		feedReadRepository.save(feedRead);
+	}
 }
