@@ -2,8 +2,6 @@ package lookids.mono.user.petprofile.application;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -11,6 +9,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lookids.mono.common.entity.BaseResponseStatus;
 import lookids.mono.common.exception.BaseException;
+import lookids.mono.sync.application.mapper.SyncDtoMapper;
+import lookids.mono.sync.application.port.in.SyncServicePort;
 import lookids.mono.user.petprofile.domain.PetProfile;
 import lookids.mono.user.petprofile.dto.in.PetProfileImgDto;
 import lookids.mono.user.petprofile.dto.in.PetProfileRequestDto;
@@ -18,9 +18,6 @@ import lookids.mono.user.petprofile.dto.in.PetProfileUpdateDto;
 import lookids.mono.user.petprofile.dto.in.PetProfileWeightDto;
 import lookids.mono.user.petprofile.dto.out.PetProfileResponseDto;
 import lookids.mono.user.petprofile.infrastructure.PetProfileRepository;
-import lookids.mono.user.petprofile.vo.out.PetProfileDeleteKafkaVo;
-import lookids.mono.user.petprofile.vo.out.PetProfileKafkaVo;
-import lookids.mono.user.petprofile.vo.out.PetProfileSearchKafkaVo;
 import lookids.mono.user.userprofile.application.UserProfileService;
 
 @Service
@@ -29,25 +26,31 @@ import lookids.mono.user.userprofile.application.UserProfileService;
 public class PetProfileServiceImpl implements PetProfileService {
 
 	private final PetProfileRepository petProfileRepository;
-	private final KafkaTemplate<String, PetProfileKafkaVo> petProfileKafkaTemplate;
 	private final UserProfileService userProfileService;
 
-	@Value("${petprofile.create}")
-	private String petProfileCreateTopic;
+	private final SyncServicePort syncServicePort;
+	private final SyncDtoMapper syncDtoMapper;
 
-	private final KafkaTemplate<String, PetProfileSearchKafkaVo> searchPetProfileKafkaTemplate;
+	//private final KafkaTemplate<String, PetProfileKafkaVo> petProfileKafkaTemplate;
+
+	// @Value("${petprofile.create}")
+	// private String petProfileCreateTopic;
+	//
+	// private final KafkaTemplate<String, PetProfileSearchKafkaVo> searchPetProfileKafkaTemplate;
 
 	@Transactional
 	@Override
 	public void createPetProfile(PetProfileRequestDto petProfileRequestDto) {
 		PetProfile petProfile = petProfileRepository.save(petProfileRequestDto.toEntity());
 
-		searchPetProfileKafkaTemplate.send(petProfileCreateTopic, PetProfileResponseDto.toDto(petProfile)
-			.toSearchVo(userProfileService.readUserProfile(petProfile.getUserUuid())));
+		// searchPetProfileKafkaTemplate.send(petProfileCreateTopic, PetProfileResponseDto.toDto(petProfile)
+		// 	.toSearchVo(userProfileService.readUserProfile(petProfile.getUserUuid())));
+		syncServicePort.createPetProfile(syncDtoMapper.toPetProfileDto(PetProfileResponseDto.toDto(petProfile)
+			.toSearchVo(userProfileService.readUserProfile(petProfile.getUserUuid()))));
 	}
 
-	@Value("${petprofile.update}")
-	private String petProfileUpdateTopic;
+	// @Value("${petprofile.update}")
+	// private String petProfileUpdateTopic;
 
 	@Transactional
 	@Override
@@ -56,7 +59,9 @@ public class PetProfileServiceImpl implements PetProfileService {
 			.orElseThrow(() -> new BaseException(BaseResponseStatus.NO_EXIST_DATA));
 
 		PetProfile newPet = petProfileRepository.save(petProfileUpdateDto.toEntity(petProfile));
-		petProfileKafkaTemplate.send(petProfileUpdateTopic, PetProfileResponseDto.toDto(newPet).toKafkaVo());
+		//petProfileKafkaTemplate.send(petProfileUpdateTopic, PetProfileResponseDto.toDto(newPet).toKafkaVo());
+		syncServicePort.updatePetProfile(
+			syncDtoMapper.toPetProfileUpdateDto(PetProfileResponseDto.toDto(newPet).toKafkaVo()));
 	}
 
 	@Override
@@ -75,9 +80,9 @@ public class PetProfileServiceImpl implements PetProfileService {
 		petProfileRepository.save(petProfileWeightDto.toEntity(petProfile));
 	}
 
-	private final KafkaTemplate<String, PetProfileDeleteKafkaVo> deletePetProfilekafkaTemplate;
-	@Value("${petprofile.delete}")
-	private String petProfileDeleteTopic;
+	// private final KafkaTemplate<String, PetProfileDeleteKafkaVo> deletePetProfilekafkaTemplate;
+	// @Value("${petprofile.delete}")
+	// private String petProfileDeleteTopic;
 
 	@Transactional
 	@Override
@@ -85,7 +90,8 @@ public class PetProfileServiceImpl implements PetProfileService {
 		PetProfile petProfile = petProfileRepository.findByPetCode(petCode)
 			.orElseThrow(() -> new BaseException(BaseResponseStatus.NO_EXIST_DATA));
 		petProfileRepository.deleteById(petProfile.getId());
-		deletePetProfilekafkaTemplate.send(petProfileDeleteTopic, PetProfileResponseDto.toDto(petProfile).toDeleteVo());
+		//deletePetProfilekafkaTemplate.send(petProfileDeleteTopic, PetProfileResponseDto.toDto(petProfile).toDeleteVo());
+		syncServicePort.deletePetProfile(petProfile.getPetCode());
 	}
 
 	@Override

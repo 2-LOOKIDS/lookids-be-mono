@@ -20,8 +20,6 @@ import lombok.extern.slf4j.Slf4j;
 import lookids.mono.common.entity.BaseResponseStatus;
 import lookids.mono.common.exception.BaseException;
 import lookids.mono.feedread.domain.FeedRead;
-import lookids.mono.feedread.dto.in.FeedReadKafkaDto;
-import lookids.mono.feedread.dto.in.UserKafkaDto;
 import lookids.mono.feedread.dto.out.FeedListResponseDto;
 import lookids.mono.feedread.dto.out.FeedReadDetailResponseDto;
 import lookids.mono.feedread.dto.out.FeedReadResponseDto;
@@ -385,9 +383,9 @@ public class FeedReadServiceImpl implements FeedReadService {
 	// 		});
 	// 	}
 	// }
-	@Override
-	public void feedConsume(FeedReadKafkaDto feedReadKafkaDto, UserKafkaDto userKafkaDto) {
-		FeedRead feedRead = FeedRead.toEntity(feedReadKafkaDto, userKafkaDto);
-		feedReadRepository.save(feedRead);
-	}
+	// @Override
+	// public void feedConsume(FeedReadKafkaDto feedReadKafkaDto, UserKafkaDto userKafkaDto) {
+	// 	FeedRead feedRead = FeedRead.toEntity(feedReadKafkaDto, userKafkaDto);
+	// 	feedReadRepository.save(feedRead);
+	// }
 }

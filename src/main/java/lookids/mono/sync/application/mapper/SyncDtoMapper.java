@@ -20,6 +20,9 @@ import lookids.mono.commentread.application.port.dto.ReplyDeleteDto;
 import lookids.mono.commentread.application.port.dto.UserProfileImageDto;
 import lookids.mono.commentread.application.port.dto.UserProfileNicknameDto;
 import lookids.mono.elasticsearch.dto.in.KafkaFeedCreateRequestDto;
+import lookids.mono.elasticsearch.dto.in.KafkaPetCreateRequestDto;
+import lookids.mono.elasticsearch.dto.in.KafkaPetDeleteRequestDto;
+import lookids.mono.elasticsearch.dto.in.KafkaPetUpdateRequestDto;
 import lookids.mono.elasticsearch.dto.in.KafkaUserCreateDto;
 import lookids.mono.elasticsearch.dto.in.KafkaUserDeleteRequestDto;
 import lookids.mono.elasticsearch.dto.in.KafkaUserImageUpdateRequestDto;
@@ -29,6 +32,7 @@ import lookids.mono.feed.dto.in.DeleteKafkaDto;
 import lookids.mono.feed.dto.in.FeedKafkaDto;
 import lookids.mono.feedread.dto.in.FeedDeleteKafkaDto;
 import lookids.mono.feedread.dto.in.FeedReadKafkaDto;
+import lookids.mono.feedread.dto.in.PetImageKafkaDto;
 import lookids.mono.feedread.dto.in.UserImageKafkaDto;
 import lookids.mono.feedread.dto.in.UserKafkaDto;
 import lookids.mono.feedread.dto.in.UserNickNameKafkaDto;
@@ -53,9 +57,12 @@ import lookids.mono.sync.application.port.dto.FeedDto;
 import lookids.mono.sync.application.port.dto.FollowDto;
 import lookids.mono.sync.application.port.dto.FollowProfileDto;
 import lookids.mono.sync.application.port.dto.NotificationDto;
+import lookids.mono.sync.application.port.dto.PetProfileDto;
 import lookids.mono.sync.application.port.dto.ReplyDto;
 import lookids.mono.sync.application.port.dto.UserDeleteDto;
 import lookids.mono.sync.application.port.dto.UserProfileDto;
+import lookids.mono.user.petprofile.vo.out.PetProfileKafkaVo;
+import lookids.mono.user.petprofile.vo.out.PetProfileSearchKafkaVo;
 import lookids.mono.user.userprofile.dto.out.FollowKafkaDto;
 import lookids.mono.user.userprofile.dto.out.UserProfileKafkaDto;
 
@@ -458,6 +465,59 @@ public class SyncDtoMapper {
 			.receiverNickname(followProfileDto.getReceiverNickname())
 			.receiverTag(followProfileDto.getReceiverTag())
 			.receiverImage(followProfileDto.getReceiverImage())
+			.build();
+	}
+
+	public PetProfileDto toPetProfileDto(PetProfileSearchKafkaVo petProfileSearchKafkaVo) {
+		return PetProfileDto.builder()
+			.petCode(petProfileSearchKafkaVo.getPetCode())
+			.petName(petProfileSearchKafkaVo.getPetName())
+			.petImage(petProfileSearchKafkaVo.getPetImage())
+			.petType(petProfileSearchKafkaVo.getPetType())
+			.userNickname(petProfileSearchKafkaVo.getUserNickname())
+			.userTag(petProfileSearchKafkaVo.getUserTag())
+			.build();
+	}
+
+	public PetProfileDto toPetProfileUpdateDto(PetProfileKafkaVo petProfileKafkaVo) {
+		return PetProfileDto.builder()
+			.petCode(petProfileKafkaVo.getPetCode())
+			.petName(petProfileKafkaVo.getPetName())
+			.petImage(petProfileKafkaVo.getImage())
+			.petType(petProfileKafkaVo.getPetType())
+			.build();
+	}
+
+	public KafkaPetCreateRequestDto toKafkaPetCreateRequestDto(PetProfileDto petProfileDto) {
+		return KafkaPetCreateRequestDto.builder()
+			.petCode(petProfileDto.getPetCode())
+			.petName(petProfileDto.getPetName())
+			.petImage(petProfileDto.getPetImage())
+			.petType(petProfileDto.getPetType())
+			.userNickname(petProfileDto.getUserNickname())
+			.userTag(petProfileDto.getUserTag())
+			.build();
+	}
+
+	public KafkaPetUpdateRequestDto toKafkaPetUpdateRequestDto(PetProfileDto petProfileDto) {
+		return KafkaPetUpdateRequestDto.builder()
+			.petCode(petProfileDto.getPetCode())
+			.petName(petProfileDto.getPetName())
+			.image(petProfileDto.getPetImage())
+			.petType(petProfileDto.getPetType())
+			.build();
+	}
+
+	public KafkaPetDeleteRequestDto toKafkaPetDeleteRequestDto(String petCode) {
+		return KafkaPetDeleteRequestDto.builder()
+			.petCode(petCode)
+			.build();
+	}
+
+	public PetImageKafkaDto toPetImageKafkaDto(PetProfileDto petProfileDto) {
+		return PetImageKafkaDto.builder()
+			.petCode(petProfileDto.getPetCode())
+			.image(petProfileDto.getPetImage())
 			.build();
 	}
 }

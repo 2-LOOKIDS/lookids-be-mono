@@ -16,9 +16,8 @@ import lookids.mono.commentread.application.port.in.UserProfileUpdateUseCase;
 import lookids.mono.elasticsearch.application.SearchService;
 import lookids.mono.favorite.application.FavoriteKafkaListener;
 import lookids.mono.feedread.application.FeedKafkaListener;
-import lookids.mono.feedread.application.FeedReadService;
 import lookids.mono.followblock.block.application.BlockService;
-import lookids.mono.followblock.follow.application.FollowService;
+import lookids.mono.followblock.follow.application.FollowKafkaListener;
 import lookids.mono.map.application.MapService;
 import lookids.mono.notification.service.NotificationKafkaListener;
 import lookids.mono.subscribe.service.SubscribeKafkaListener;
@@ -29,12 +28,13 @@ import lookids.mono.sync.application.port.dto.FavoriteDto;
 import lookids.mono.sync.application.port.dto.FeedDeleteDto;
 import lookids.mono.sync.application.port.dto.FeedDto;
 import lookids.mono.sync.application.port.dto.FollowDto;
+import lookids.mono.sync.application.port.dto.PetProfileDto;
 import lookids.mono.sync.application.port.dto.ReplyDto;
 import lookids.mono.sync.application.port.dto.UserDeleteDto;
 import lookids.mono.sync.application.port.dto.UserProfileDto;
 import lookids.mono.sync.application.port.in.SyncServicePort;
-import lookids.mono.user.petprofile.application.PetProfileService;
-import lookids.mono.user.userprofile.application.UserProfileService;
+import lookids.mono.user.petprofile.application.PetProfileKafkaListener;
+import lookids.mono.user.userprofile.application.UserProfileKafkaListener;
 
 @RequiredArgsConstructor
 @Service
@@ -53,20 +53,24 @@ public class SyncService implements SyncServicePort {
 	private final FeedLogUseCase feedLogUseCase;
 	private final FollowLogUseCase followLogUseCase;
 
-	private final FavoriteKafkaListener favoriteKafkaListener;
-
-	private final FeedReadService feedReadService;
+	//private final FeedReadService feedReadService;
 	private final FeedKafkaListener feedKafkaListener;
 
 	private final BlockService blockService;
-	private final FollowService followService;
+
+	//private final FollowService followService;
+	private final FollowKafkaListener followKafkaListener;
+
+	private final FavoriteKafkaListener favoriteKafkaListener;
 
 	private final MapService mapService;
 
 	private final SearchService searchService;
 
-	private final UserProfileService userProfileService;
-	private final PetProfileService petProfileService;
+	// private final UserProfileService userProfileService;
+	// private final PetProfileService petProfileService;
+	private final UserProfileKafkaListener userProfileKafkaListener;
+	private final PetProfileKafkaListener petProfileKafkaListener;
 
 	private final NotificationKafkaListener notificationKafkaListener;
 
@@ -82,7 +86,7 @@ public class SyncService implements SyncServicePort {
 	@Override
 	public void createComment(CommentDto commentDto) {
 		UserProfileDto userProfileDto = syncDtoMapper.toUserProfileDto(
-			userProfileService.consumeCommentEvent(commentDto.getUuid()));
+			userProfileKafkaListener.consumeCommentEvent(commentDto.getUuid()));
 		commentReadCreateUseCase.createCommentRead(
 			syncDtoMapper.toCommentCreateEventDto(userProfileDto, commentDto));
 		commentLogUseCase.commentCreateLog(syncDtoMapper.toCommentCreateBatchDto(commentDto));
@@ -93,7 +97,7 @@ public class SyncService implements SyncServicePort {
 	@Override
 	public void createReply(ReplyDto replyDto) {
 		UserProfileDto userProfileDto = syncDtoMapper.toUserProfileDto(
-			userProfileService.consumeCommentEvent(replyDto.getUuid()));
+			userProfileKafkaListener.consumeCommentEvent(replyDto.getUuid()));
 		commentReadCreateUseCase.createReplyRead(syncDtoMapper.toReplyCreateEventDto(userProfileDto, replyDto));
 		commentLogUseCase.replyCreateLog(syncDtoMapper.toReplyCreateBatchDto(replyDto));
 		notificationKafkaListener.consumeCommentReplyNotificationEvent(
@@ -127,7 +131,7 @@ public class SyncService implements SyncServicePort {
 	public void updateUserProfileImage(UserProfileDto userProfileDto) {
 		userProfileUpdateUseCase.updateProfileImage(syncDtoMapper.toUserProfileImageDto(userProfileDto));
 		searchService.consumeUserImageUpdate(syncDtoMapper.toKafkaUserImageUpdateRequestDto(userProfileDto));
-		followService.consumeUserImageUpdate(syncDtoMapper.toKafkaUserUpdateRequestDto(userProfileDto));
+		followKafkaListener.consumeUserImageUpdate(syncDtoMapper.toKafkaUserUpdateRequestDto(userProfileDto));
 		feedKafkaListener.imageUpdateConsume(syncDtoMapper.toUserImageKafkaDto(userProfileDto));
 	}
 
@@ -135,7 +139,7 @@ public class SyncService implements SyncServicePort {
 	public void updateUserProfileNickname(UserProfileDto userProfileDto) {
 		userProfileUpdateUseCase.updateNickname(syncDtoMapper.toUserProfileNicknameDto(userProfileDto));
 		searchService.consumeUserNicknameUpdate(syncDtoMapper.toUserNicknameUpdateRequestDto(userProfileDto));
-		followService.consumeUserNicknameUpdate(syncDtoMapper.toKafkaUserUpdateRequestDto(userProfileDto));
+		followKafkaListener.consumeUserNicknameUpdate(syncDtoMapper.toKafkaUserUpdateRequestDto(userProfileDto));
 		feedKafkaListener.nickNameUpdateConsume(syncDtoMapper.toUserNickNameKafkaDto(userProfileDto));
 	}
 
@@ -159,8 +163,8 @@ public class SyncService implements SyncServicePort {
 	@Override
 	public void createFeed(FeedDto feedDto) {
 		UserProfileDto userProfileDto = syncDtoMapper.toUserProfileDto(
-			userProfileService.consumeCommentEvent(feedDto.getUuid()));
-		feedReadService.feedConsume(syncDtoMapper.toFeedKafkaDto(feedDto),
+			userProfileKafkaListener.consumeCommentEvent(feedDto.getUuid()));
+		feedKafkaListener.feedConsume(syncDtoMapper.toFeedKafkaDto(feedDto),
 			syncDtoMapper.toUserKafkaDto(userProfileDto));
 		feedLogUseCase.feedCreateLog(syncDtoMapper.toFeedCreateEventDto(feedDto));
 		mapService.consumeFeedCreate(syncDtoMapper.toFeedCodeResponseDto(feedDto));
@@ -184,9 +188,9 @@ public class SyncService implements SyncServicePort {
 		followLogUseCase.followCreateLog(syncDtoMapper.toFollowEventDto(followDto));
 		notificationKafkaListener.consumeFollowNotificationEvent(
 			syncDtoMapper.toNotificationFollowRequestDto(followDto));
-		followService.consumeFollowInfo(syncDtoMapper.toKafkaFollowDto(
+		followKafkaListener.consumeFollowInfo(syncDtoMapper.toKafkaFollowDto(
 			syncDtoMapper.toFollowProfileDto(
-				userProfileService.consumeFollowEvent(followDto.getSenderUuid(), followDto.getReceiverUuid()))));
+				userProfileKafkaListener.consumeFollowEvent(followDto.getSenderUuid(), followDto.getReceiverUuid()))));
 
 	}
 
@@ -196,13 +200,29 @@ public class SyncService implements SyncServicePort {
 	}
 
 	@Override
+	public void createPetProfile(PetProfileDto petProfileDto) {
+		searchService.consumePetCreate(syncDtoMapper.toKafkaPetCreateRequestDto(petProfileDto));
+	}
+
+	@Override
+	public void updatePetProfile(PetProfileDto petProfileDto) {
+		searchService.consumePetUpdate(syncDtoMapper.toKafkaPetUpdateRequestDto(petProfileDto));
+		feedKafkaListener.petProfileUpdateConsume(syncDtoMapper.toPetImageKafkaDto(petProfileDto));
+	}
+
+	@Override
+	public void deletePetProfile(String petCode) {
+		searchService.consumePetDelete(syncDtoMapper.toKafkaPetDeleteRequestDto(petCode));
+	}
+
+	@Override
 	public String readImageByPetCode(String petCode) {
-		return petProfileService.findPetImage(petCode);
+		return petProfileKafkaListener.findPetImage(petCode);
 	}
 
 	@Override
 	public List<String> getFollowUuidList(String uuid) {
-		return followService.consumeForFollowUuid(uuid);
+		return followKafkaListener.consumeForFollowUuid(uuid);
 	}
 
 	@Override

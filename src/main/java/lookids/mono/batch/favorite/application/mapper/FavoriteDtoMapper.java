@@ -20,7 +20,7 @@ public class FavoriteDtoMapper {
 			.uuid(favoriteEvent.getUuid())
 			.targetCode(favoriteEvent.getTargetCode())
 			.favoriteState(favoriteEvent.getFavoriteState())
-			.favoriteType(favoriteEvent.getFavoriteType())
+			//.favoriteType(favoriteEvent.getFavoriteType())
 			.build();
 	}
 

@@ -2,7 +2,6 @@ package lookids.mono.elasticsearch.application;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 
 import lombok.AllArgsConstructor;
@@ -153,7 +152,8 @@ public class SearchServiceImpl implements SearchService {
 
 	}
 
-	@KafkaListener(topics = "petprofile-create", groupId = "petcreate-group", containerFactory = "PetCreateContainerFactory")
+	@Override
+	//@KafkaListener(topics = "petprofile-create", groupId = "petcreate-group", containerFactory = "PetCreateContainerFactory")
 	public void consumePetCreate(KafkaPetCreateRequestDto kafkaPetCreateRequestDto) {
 
 		SearchPet searchPet = SearchPet.builder()
@@ -169,7 +169,8 @@ public class SearchServiceImpl implements SearchService {
 
 	}
 
-	@KafkaListener(topics = "petprofile-update", groupId = "petupdate-group", containerFactory = "PetUpdateContainerFactory")
+	@Override
+	//@KafkaListener(topics = "petprofile-update", groupId = "petupdate-group", containerFactory = "PetUpdateContainerFactory")
 	public void consumePetUpdate(KafkaPetUpdateRequestDto kafkaPetUpdateRequestDto) {
 
 		SearchPet searchPet = searchPetRepository.findByPetCode(kafkaPetUpdateRequestDto.getPetCode());
@@ -179,7 +180,8 @@ public class SearchServiceImpl implements SearchService {
 
 	}
 
-	@KafkaListener(topics = "petprofile-delete", groupId = "petdelete-group", containerFactory = "PetDeleteContainerFactory")
+	@Override
+	//@KafkaListener(topics = "petprofile-delete", groupId = "petdelete-group", containerFactory = "PetDeleteContainerFactory")
 	public void consumePetDelete(KafkaPetDeleteRequestDto kafkaPetDeleteRequestDto) {
 
 		kafkaBatchCollector.addPetDeleteBatch(kafkaPetDeleteRequestDto.getPetCode());
