@@ -140,8 +140,22 @@ public class CommentReadDtoMapper {
 			.build();
 	}
 
-	public UserProfileUpdateSaveDto toProfileUpdateSaveDto(String uuid, Update update) {
-		return UserProfileUpdateSaveDto.builder().userUuid(uuid).update(update).build();
+	public UserProfileUpdateSaveDto toProfileUpdateSaveDto(UserProfileNicknameDto userProfileNicknameDto,
+		Update update) {
+		return UserProfileUpdateSaveDto.builder()
+			.userUuid(userProfileNicknameDto.getUserUuid())
+			.nickName(userProfileNicknameDto.getNickname())
+			.tag(userProfileNicknameDto.getTag())
+			.update(update)
+			.build();
+	}
+
+	public UserProfileUpdateSaveDto toProfileUpdateSaveDto(UserProfileImageDto userProfileImageDto, Update update) {
+		return UserProfileUpdateSaveDto.builder()
+			.userUuid(userProfileImageDto.getUserUuid())
+			.image(userProfileImageDto.getImage())
+			.update(update)
+			.build();
 	}
 
 	public CommentDeleteDto toCommentDeleteDto(CommentEvent commentEvent) {

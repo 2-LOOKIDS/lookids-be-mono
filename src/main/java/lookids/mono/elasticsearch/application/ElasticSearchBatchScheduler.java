@@ -29,7 +29,7 @@ public class ElasticSearchBatchScheduler {
 
 	private final ElasticsearchRestTemplate elasticsearchRestTemplate;
 
-	@Scheduled(fixedDelay = 60000) // 1분마다 실행
+	@Scheduled(fixedDelay = 600) // 1분마다 실행
 	public void UserSaveBatch() {
 		List<SearchUser> batch = kafkaBatchCollector.getUserCreateBatch();
 		searchUserRepository.save(batch);

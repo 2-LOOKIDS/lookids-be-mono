@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import lookids.mono.batch.comment.application.port.in.CommentLogUseCase;
 import lookids.mono.batch.favorite.application.port.in.FavoriteLogUseCase;
 import lookids.mono.batch.feed.application.port.in.FeedLogUseCase;
@@ -36,6 +37,7 @@ import lookids.mono.sync.application.port.in.SyncServicePort;
 import lookids.mono.user.petprofile.application.PetProfileKafkaListener;
 import lookids.mono.user.userprofile.application.UserProfileKafkaListener;
 
+@Slf4j
 @RequiredArgsConstructor
 @Service
 public class SyncService implements SyncServicePort {
@@ -166,10 +168,10 @@ public class SyncService implements SyncServicePort {
 			userProfileKafkaListener.consumeCommentEvent(feedDto.getUuid()));
 		feedKafkaListener.feedConsume(syncDtoMapper.toFeedKafkaDto(feedDto),
 			syncDtoMapper.toUserKafkaDto(userProfileDto));
+		log.info("feedDto:{}", feedDto);
 		feedLogUseCase.feedCreateLog(syncDtoMapper.toFeedCreateEventDto(feedDto));
 		mapService.consumeFeedCreate(syncDtoMapper.toFeedCodeResponseDto(feedDto));
 		searchService.consumeFeedCreate(syncDtoMapper.toKafkaFeedCreateRequestDto(feedDto));
-
 		notificationKafkaListener.consumeFeedNotificationEvent(syncDtoMapper.toNotificationFeedRequestDto(
 			syncDtoMapper.toNotificationDto(
 				subscribeKafkaListener.consumeFeedEvent(syncDtoMapper.toFeedKafkaRequestDto(feedDto)))));

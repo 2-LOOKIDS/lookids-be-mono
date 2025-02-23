@@ -71,16 +71,42 @@ public class CommentRepositoryImpl implements CommentRepositoryPort {
 	}
 
 	@Override
-	public void updateUserProfile(UserProfileUpdateSaveDto userProfileUpdateSaveDto) {
+	public void updateUserName(UserProfileUpdateSaveDto userProfileUpdateSaveDto) {
 		Query commentQuery = new Query(Criteria.where("userUuid").is(userProfileUpdateSaveDto.getUserUuid()));
 		mongoTemplate.updateMulti(commentQuery, userProfileUpdateSaveDto.getUpdate(), "comment_entity");
 
 		// 대댓글 갱신
 		Query replyQuery = new Query(Criteria.where("replyList.userUuid").is(userProfileUpdateSaveDto.getUserUuid()));
+		Update update = userProfileUpdateSaveDto.getUpdate();
+		update.set("replyList.$[elem].nickname", userProfileUpdateSaveDto.getNickName());
+		update.set("replyList.$[elem].tag", userProfileUpdateSaveDto.getTag());
+
+		// 그리고 다시 배열 필터를 적용합니다
 		UpdateOptions options = new UpdateOptions().arrayFilters(
-			List.of(new Document("elem.userUuid", userProfileUpdateSaveDto.getUserUuid())));
+			List.of(new Document("elem.userUuid", userProfileUpdateSaveDto.getUserUuid()))
+		);
+
 		mongoTemplate.getCollection("comment_entity")
-			.updateMany(replyQuery.getQueryObject(), userProfileUpdateSaveDto.getUpdate().getUpdateObject(), options);
+			.updateMany(replyQuery.getQueryObject(), update.getUpdateObject(), options);
+	}
+
+	@Override
+	public void updateUserImage(UserProfileUpdateSaveDto userProfileUpdateSaveDto) {
+		Query commentQuery = new Query(Criteria.where("userUuid").is(userProfileUpdateSaveDto.getUserUuid()));
+		mongoTemplate.updateMulti(commentQuery, userProfileUpdateSaveDto.getUpdate(), "comment_entity");
+
+		// 대댓글 갱신
+		Query replyQuery = new Query(Criteria.where("replyList.userUuid").is(userProfileUpdateSaveDto.getUserUuid()));
+		Update update = userProfileUpdateSaveDto.getUpdate();
+		update.set("replyList.$[elem].profileImg", userProfileUpdateSaveDto.getImage());
+
+		// 그리고 다시 배열 필터를 적용합니다
+		UpdateOptions options = new UpdateOptions().arrayFilters(
+			List.of(new Document("elem.userUuid", userProfileUpdateSaveDto.getUserUuid()))
+		);
+
+		mongoTemplate.getCollection("comment_entity")
+			.updateMany(replyQuery.getQueryObject(), update.getUpdateObject(), options);
 	}
 
 	public void updateReplyCount(String parentCommentCode, int change) {

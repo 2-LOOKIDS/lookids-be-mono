@@ -91,7 +91,7 @@ public class SearchServiceImpl implements SearchService {
 	//@KafkaListener(topics = "userprofile-nickname-update", groupId = "usernicknameupdate-group", containerFactory = "UserNicknameUpdateContainerFactory")
 	public void consumeUserNicknameUpdate(KafkaUserNicknameUpdateRequestDto kafkaUserNicknameUpdateRequestDto) {
 
-		System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+		log.info("consumeUserNicknameUpdate");
 		SearchUser searchUser = searchUserRepository.findByUuid(kafkaUserNicknameUpdateRequestDto.getUuid());
 
 		kafkaBatchCollector.addUserUpdateBatch(

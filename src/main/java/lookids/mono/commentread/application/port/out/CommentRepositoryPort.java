@@ -17,7 +17,9 @@ public interface CommentRepositoryPort {
 
 	void updateComment(CommentReadUpdateDto commentReadUpdateDto);
 
-	void updateUserProfile(UserProfileUpdateSaveDto userProfileUpdateSaveDto);
+	void updateUserName(UserProfileUpdateSaveDto userProfileUpdateSaveDto);
+
+	void updateUserImage(UserProfileUpdateSaveDto userProfileUpdateSaveDto);
 
 	Page<CommentForRead> readCommentList(String feedCode, Pageable pageable);
 

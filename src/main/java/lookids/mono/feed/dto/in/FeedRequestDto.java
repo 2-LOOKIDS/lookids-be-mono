@@ -101,7 +101,8 @@ public class FeedRequestDto {
 			.tagList(tagList.stream().map(String::toLowerCase).collect(Collectors.toList()))
 			.state(savefeed.isState())
 			.mediaUrlList(mediaUrlList)
-			.createdAt(savefeed.getCreatedAt())
+			//.createdAt(savefeed.getCreatedAt())
+			.createdAt(LocalDateTime.now())
 			.build();
 	}
 }

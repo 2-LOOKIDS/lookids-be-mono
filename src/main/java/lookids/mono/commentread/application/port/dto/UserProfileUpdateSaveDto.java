@@ -10,11 +10,17 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class UserProfileUpdateSaveDto {
 	private String userUuid;
+	private String nickName;
+	private String tag;
+	private String image;
 	private Update update;
 
 	@Builder
-	public UserProfileUpdateSaveDto(String userUuid, Update update) {
+	public UserProfileUpdateSaveDto(String userUuid, String nickName, String tag, String image, Update update) {
 		this.userUuid = userUuid;
+		this.nickName = nickName;
+		this.tag = tag;
+		this.image = image;
 		this.update = update;
 	}
 }

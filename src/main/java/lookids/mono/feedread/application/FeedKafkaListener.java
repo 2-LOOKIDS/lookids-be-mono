@@ -36,7 +36,8 @@ public class FeedKafkaListener {
 	public void nickNameUpdateConsume(UserNickNameKafkaDto userNickNameKafkaDto) {
 		List<FeedRead> findUuid = feedReadRepository.findAllByUuid(userNickNameKafkaDto.getUuid());
 		if (findUuid.isEmpty()) {
-			throw new BaseException(BaseResponseStatus.NO_EXIST_FEED);
+			//throw new BaseException(BaseResponseStatus.NO_EXIST_FEED);
+			return;  // 함수 종료
 		}
 		List<FeedRead> nickNameUpdate = findUuid.stream()
 			.map(userNickNameKafkaDto::toNickNameUpdate)
@@ -49,7 +50,8 @@ public class FeedKafkaListener {
 	public void imageUpdateConsume(UserImageKafkaDto userImageKafkaDto) {
 		List<FeedRead> findUuid = feedReadRepository.findAllByUuid(userImageKafkaDto.getUuid());
 		if (findUuid.isEmpty()) {
-			throw new BaseException(BaseResponseStatus.NO_EXIST_FEED);
+			//throw new BaseException(BaseResponseStatus.NO_EXIST_FEED);
+			return;  // 함수 종료
 		}
 		List<FeedRead> imageUpdate = findUuid.stream()
 			.map(userImageKafkaDto::toImageUpdate)
@@ -80,7 +82,8 @@ public class FeedKafkaListener {
 	public void petProfileUpdateConsume(PetImageKafkaDto petImageKafkaDto) {
 		List<FeedRead> findPetCode = feedReadRepository.findAllBypetCode(petImageKafkaDto.getPetCode());
 		if (findPetCode.isEmpty()) {
-			throw new BaseException(BaseResponseStatus.NO_EXIST_FEED);
+			//throw new BaseException(BaseResponseStatus.NO_EXIST_FEED);
+			return;  // 함수 종료
 		}
 		List<FeedRead> imageUpdateList = findPetCode.stream()
 			.map(petImageKafkaDto::toImageUpdate)
@@ -92,12 +95,13 @@ public class FeedKafkaListener {
 	public void accountDeleteConsume(UuidKafkaDto uuidKafkaDto) {
 		List<FeedRead> findUuid = feedReadRepository.findAllByUuid(uuidKafkaDto.getUuid());
 		if (findUuid.isEmpty()) {
-			throw new BaseException(BaseResponseStatus.NO_EXIST_FEED);
+			//throw new BaseException(BaseResponseStatus.NO_EXIST_FEED);
+			return;  // 함수 종료
 		}
 		List<FeedRead> feedDelete = findUuid.stream().map(uuidKafkaDto::toDelete).collect(Collectors.toList());
 		feedReadRepository.saveAll(feedDelete);
 	}
-	
+
 	public void feedConsume(FeedReadKafkaDto feedReadKafkaDto, UserKafkaDto userKafkaDto) {
 		FeedRead feedRead = FeedRead.toEntity(feedReadKafkaDto, userKafkaDto);
 		feedReadRepository.save(feedRead);

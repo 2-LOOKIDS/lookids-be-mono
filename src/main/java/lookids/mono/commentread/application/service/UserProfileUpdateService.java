@@ -20,13 +20,13 @@ public class UserProfileUpdateService implements UserProfileUpdateUseCase {
 	public void updateNickname(UserProfileNicknameDto userProfileNicknameDto) {
 		Update update = new Update().set("nickname", userProfileNicknameDto.getNickname())
 			.set("tag", userProfileNicknameDto.getTag());
-		commentRepositoryPort.updateUserProfile(
-			commentReadDtoMapper.toProfileUpdateSaveDto(userProfileNicknameDto.getUserUuid(), update));
+		commentRepositoryPort.updateUserName(
+			commentReadDtoMapper.toProfileUpdateSaveDto(userProfileNicknameDto, update));
 	}
 
 	public void updateProfileImage(UserProfileImageDto userProfileImageDto) {
 		Update update = new Update().set("profileImg", userProfileImageDto.getImage());
-		commentRepositoryPort.updateUserProfile(
-			commentReadDtoMapper.toProfileUpdateSaveDto(userProfileImageDto.getUserUuid(), update));
+		commentRepositoryPort.updateUserImage(
+			commentReadDtoMapper.toProfileUpdateSaveDto(userProfileImageDto, update));
 	}
 }

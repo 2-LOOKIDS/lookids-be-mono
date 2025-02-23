@@ -54,7 +54,7 @@ public class NotificationKafkaListener {
 
 				try {
 					sseService.sendSseNotification(receiverUuid, notification); // SSE 알림 전송
-					Optional<FcmToken> tmpFcm = fcmTokenRepository.findByUuid(receiverUuid);
+					//Optional<FcmToken> tmpFcm = fcmTokenRepository.findByUuid(receiverUuid);
 
 					// if (tmpFcm.isPresent()) {
 					// 	tmpFcm.get().getFcmTokenList().forEach(token -> {
@@ -100,13 +100,13 @@ public class NotificationKafkaListener {
 		notificationRepository.save(notification);
 
 		// 정책: 빈도가 잦은 채팅은 sse 알림 미적용
-		notification.getReceiverUuidList().forEach(receiverUuid -> {
-			fcmTokenRepository.findByUuid(receiverUuid).get().getFcmTokenList().forEach(token -> {
-				log.info("Sending push notification to user: {}", receiverUuid);
-				log.info("Sending push notification to token: {}", token);
-				pushService.sendPushNotification(token, notification); // FCM 푸시 알림 전송
-			});
-		});
+		// notification.getReceiverUuidList().forEach(receiverUuid -> {
+		// 	fcmTokenRepository.findByUuid(receiverUuid).get().getFcmTokenList().forEach(token -> {
+		// 		log.info("Sending push notification to user: {}", receiverUuid);
+		// 		log.info("Sending push notification to token: {}", token);
+		// 		pushService.sendPushNotification(token, notification); // FCM 푸시 알림 전송
+		// 	});
+		// });
 
 	}
 
@@ -133,11 +133,11 @@ public class NotificationKafkaListener {
 			log.info("Sending notification to user: {}", receiverUuid);
 			sseService.sendSseNotification(receiverUuid, notification); // SSE 알림 전송
 
-			fcmTokenRepository.findByUuid(receiverUuid).get().getFcmTokenList().forEach(token -> {
-				log.info("Sending push notification to user: {}", receiverUuid);
-				log.info("Sending push notification to token: {}", token);
-				pushService.sendPushNotification(token, notification); // FCM 푸시 알림 전송
-			});
+			// fcmTokenRepository.findByUuid(receiverUuid).get().getFcmTokenList().forEach(token -> {
+			// 	log.info("Sending push notification to user: {}", receiverUuid);
+			// 	log.info("Sending push notification to token: {}", token);
+			// 	pushService.sendPushNotification(token, notification); // FCM 푸시 알림 전송
+			// });
 		});
 
 	}
@@ -164,11 +164,11 @@ public class NotificationKafkaListener {
 			log.info("Sending notification to user: {}", receiverUuid);
 			sseService.sendSseNotification(receiverUuid, notification); // SSE 알림 전송
 
-			fcmTokenRepository.findByUuid(receiverUuid).get().getFcmTokenList().forEach(token -> {
-				log.info("Sending push notification to user: {}", receiverUuid);
-				log.info("Sending push notification to token: {}", token);
-				pushService.sendPushNotification(token, notification); // FCM 푸시 알림 전송
-			});
+			// fcmTokenRepository.findByUuid(receiverUuid).get().getFcmTokenList().forEach(token -> {
+			// 	log.info("Sending push notification to user: {}", receiverUuid);
+			// 	log.info("Sending push notification to token: {}", token);
+			// 	pushService.sendPushNotification(token, notification); // FCM 푸시 알림 전송
+			// });
 		});
 
 	}
@@ -194,11 +194,11 @@ public class NotificationKafkaListener {
 			log.info("Sending notification to user: {}", receiverUuid);
 			sseService.sendSseNotification(receiverUuid, notification); // SSE 알림 전송
 
-			fcmTokenRepository.findByUuid(receiverUuid).get().getFcmTokenList().forEach(token -> {
-				log.info("Sending push notification to user: {}", receiverUuid);
-				log.info("Sending push notification to token: {}", token);
-				pushService.sendPushNotification(token, notification); // FCM 푸시 알림 전송
-			});
+			// fcmTokenRepository.findByUuid(receiverUuid).get().getFcmTokenList().forEach(token -> {
+			// 	log.info("Sending push notification to user: {}", receiverUuid);
+			// 	log.info("Sending push notification to token: {}", token);
+			// 	//pushService.sendPushNotification(token, notification); // FCM 푸시 알림 전송
+			// });
 		});
 
 	}
@@ -283,11 +283,11 @@ public class NotificationKafkaListener {
 			log.info("Sending notification to user: {}", receiverUuid);
 			sseService.sendSseNotification(receiverUuid, notification); // SSE 알림 전송
 
-			fcmTokenRepository.findByUuid(receiverUuid).get().getFcmTokenList().forEach(token -> {
-				log.info("Sending push notification to user: {}", receiverUuid);
-				log.info("Sending push notification to token: {}", token);
-				pushService.sendPushNotification(token, notification); // FCM 푸시 알림 전송
-			});
+			// fcmTokenRepository.findByUuid(receiverUuid).get().getFcmTokenList().forEach(token -> {
+			// 	log.info("Sending push notification to user: {}", receiverUuid);
+			// 	log.info("Sending push notification to token: {}", token);
+			// 	pushService.sendPushNotification(token, notification); // FCM 푸시 알림 전송
+			// });
 		});
 	}
 

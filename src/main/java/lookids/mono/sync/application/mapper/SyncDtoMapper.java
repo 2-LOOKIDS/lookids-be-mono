@@ -27,6 +27,7 @@ import lookids.mono.elasticsearch.dto.in.KafkaUserCreateDto;
 import lookids.mono.elasticsearch.dto.in.KafkaUserDeleteRequestDto;
 import lookids.mono.elasticsearch.dto.in.KafkaUserImageUpdateRequestDto;
 import lookids.mono.elasticsearch.dto.in.KafkaUserNicknameUpdateRequestDto;
+import lookids.mono.favorite.domain.Favorite;
 import lookids.mono.favorite.dto.FavoriteRequestDto;
 import lookids.mono.feed.dto.in.DeleteKafkaDto;
 import lookids.mono.feed.dto.in.FeedKafkaDto;
@@ -235,6 +236,7 @@ public class SyncDtoMapper {
 	public NotificationCommentRequestDto toNotificationCommentRequestDto(CommentDto commentDto) {
 		return NotificationCommentRequestDto.builder()
 			.feedCode(commentDto.getFeedCode())
+			.receiverUuid(commentDto.getFeedUuid())
 			.uuid(commentDto.getUuid())
 			.content(commentDto.getContent())
 			.build();
@@ -243,18 +245,19 @@ public class SyncDtoMapper {
 	public NotificationCommentReplyRequestDto toNotificationCommentReplyRequestDto(ReplyDto replyDto) {
 		return NotificationCommentReplyRequestDto.builder()
 			.feedCode(replyDto.getFeedCode())
+			.receiverUuid(replyDto.getFeedUuid())
 			.uuid(replyDto.getUuid())
 			.content(replyDto.getContent())
 			.build();
 	}
 
-	public FavoriteDto toFavoriteDto(FavoriteRequestDto favoriteRequestDto) {
+	public FavoriteDto toFavoriteDto(Favorite favorite, FavoriteRequestDto favoriteRequestDto) {
 		return FavoriteDto.builder()
-			.uuid(favoriteRequestDto.getUuid())
+			.uuid(favorite.getUuid())
 			.receiverUuid(favoriteRequestDto.getAuthorUuid())
-			.targetCode(favoriteRequestDto.getTargetCode())
-			.favoriteState(favoriteRequestDto.getFavoriteState())
-			.favoriteType(favoriteRequestDto.getFavoriteType().toString())
+			.targetCode(favorite.getTargetCode())
+			.favoriteState(favorite.getFavoriteState())
+			.favoriteType(favorite.getFavoriteType().toString())
 			.build();
 	}
 
@@ -431,6 +434,7 @@ public class SyncDtoMapper {
 		return NotificationFollowRequestDto.builder()
 			.receiverUuid(followDto.getReceiverUuid())
 			.senderUuid(followDto.getSenderUuid())
+			.type("follow")
 			.build();
 	}
 

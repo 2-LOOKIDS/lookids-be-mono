@@ -41,7 +41,7 @@ public class FavoriteServiceImpl implements FavoriteService {
 		// 	kafkaTemplateForNotification.send("comment-favorite-create",
 		// 		FavoriteNotificationDto.toDto(favoriteRequestDto)); //알림용
 		// }
-		syncServicePort.createFavorite(syncDtoMapper.toFavoriteDto(favoriteRequestDto));
+		syncServicePort.createFavorite(syncDtoMapper.toFavoriteDto(saveFavorite, favoriteRequestDto));
 	}
 
 	@Override
@@ -53,7 +53,7 @@ public class FavoriteServiceImpl implements FavoriteService {
 			createFavorite(favoriteRequestDto);
 		} else {
 			Favorite saveFavorite = favoriteRepository.save(FavoriteRequestDto.toUpdateEntity(favorite));
-			syncServicePort.updateFavorite(syncDtoMapper.toFavoriteDto(favoriteRequestDto));
+			syncServicePort.updateFavorite(syncDtoMapper.toFavoriteDto(favorite, favoriteRequestDto));
 		}
 
 	}
