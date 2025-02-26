@@ -36,8 +36,8 @@ public class FeedListResponseDto {
 		this.createdAt = createdAt;
 	}
 
-	public static FeedListResponseDto toDto(FeedRead feedRead, String petProfilImage) {
-		String image = petProfilImage != null ? petProfilImage : feedRead.getImage();
+	public static FeedListResponseDto toDto(FeedRead feedRead, String petProfileImage) {
+		String image = petProfileImage != null ? petProfileImage : feedRead.getImage();
 		return FeedListResponseDto.builder()
 			.uuid(feedRead.getUuid())
 			.nickname(feedRead.getNickname())

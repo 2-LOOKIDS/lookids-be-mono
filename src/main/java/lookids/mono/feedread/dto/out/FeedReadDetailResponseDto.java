@@ -38,8 +38,8 @@ public class FeedReadDetailResponseDto {
 		this.createdAt = createdAt;
 	}
 
-	public static FeedReadDetailResponseDto toDto(FeedRead feedRead, String petProfilImage) {
-		String image = petProfilImage != null ? petProfilImage : feedRead.getImage();
+	public static FeedReadDetailResponseDto toDto(FeedRead feedRead, String petProfileImage) {
+		String image = petProfileImage != null ? petProfileImage : feedRead.getImage();
 		return FeedReadDetailResponseDto.builder()
 			.uuid(feedRead.getUuid())
 			.petCode(feedRead.getPetCode())

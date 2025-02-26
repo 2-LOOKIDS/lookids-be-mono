@@ -22,6 +22,6 @@ public class PetProfileKafkaListener {
 		//
 		// return petProfile.getImage();
 		PetProfile petProfile = petProfileRepository.findByPetCode(petCode).orElse(null);
-		return (petProfile != null) ? petProfile.getImage() : "";
+		return (petProfile != null) ? petProfile.getImage() : null;
 	}
 }

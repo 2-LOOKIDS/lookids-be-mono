@@ -218,7 +218,10 @@ public class FeedReadServiceImpl implements FeedReadService {
 			.getMappedResults()
 			.stream()
 			.map(feedRead -> {
-				String image = syncServicePort.readImageByPetCode(feedRead.getPetCode().get(0));
+				String image = null;
+				if (feedRead.getPetCode() != null && !feedRead.getPetCode().isEmpty()) {
+					image = syncServicePort.readImageByPetCode(feedRead.getPetCode().get(0));
+				}
 				return FeedListResponseDto.toDto(feedRead, image);
 			})
 			.collect(Collectors.toList());
@@ -294,7 +297,10 @@ public class FeedReadServiceImpl implements FeedReadService {
 		List<FeedRead> feedReadList = mongoTemplate.aggregate(aggregation, "feedRead", FeedRead.class)
 			.getMappedResults();
 		List<FeedListResponseDto> feedRandomList = feedReadList.stream().map(feedRead -> {
-			String image = syncServicePort.readImageByPetCode(feedRead.getPetCode().get(0));
+			String image = null;
+			if (feedRead.getPetCode() != null && !feedRead.getPetCode().isEmpty()) {
+				image = syncServicePort.readImageByPetCode(feedRead.getPetCode().get(0));
+			}
 			return FeedListResponseDto.toDto(feedRead, image);
 		}).collect(Collectors.toList());
 		long total = mongoTemplate.count(Query.query(Criteria.where("state").is(true)), "feedRead");
@@ -321,7 +327,10 @@ public class FeedReadServiceImpl implements FeedReadService {
 	public FeedReadDetailResponseDto readFeedDetail(String feedCode) {
 		FeedRead feedRead = feedReadRepository.findByFeedCodeAndStateTrue(feedCode)
 			.orElseThrow(() -> new BaseException(BaseResponseStatus.NO_EXIST_FEED));
-		String image = syncServicePort.readImageByPetCode(feedRead.getPetCode().get(0));
+		String image = null;
+		if (feedRead.getPetCode() != null && !feedRead.getPetCode().isEmpty()) {
+			image = syncServicePort.readImageByPetCode(feedRead.getPetCode().get(0));
+		}
 		return FeedReadDetailResponseDto.toDto(feedRead, image);
 	}
 
